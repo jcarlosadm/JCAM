@@ -1,8 +1,8 @@
 package br.ufal.ic.JCAM;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 
 public class Analyzer {
 
@@ -19,7 +19,7 @@ public class Analyzer {
 			SyntaticAnalyzer syntaticAnalyzer = new SyntaticAnalyzer(new LexicalAnalyzer(file));
 			syntaticAnalyzer.run();
 			
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			System.out.println("Arquivo não encontrado!");
 		}
 	}
