@@ -100,7 +100,8 @@ public class LexicalAnalyzer {
 				break;
 
 			if (this.canGrown(charValue) && !this.canGrown(charValue + String.valueOf((char) charInt)))
-				if (!charValue.matches(REGEX_PART_OF_CONST_TEXTO))
+				if (!charValue.matches(REGEX_PART_OF_CONST_TEXTO) || !charValue.matches(REGEX_PART_OF_CONST_TEXTO_2)
+						|| !charValue.matches(REGEX_PART_OF_CONST_CHAR))
 					break;
 
 			charValue += String.valueOf((char) charInt);
@@ -255,13 +256,6 @@ public class LexicalAnalyzer {
 	private TokenCategory getTokenCategory(String charValue) {
 		// check fixed tokens
 		TokenCategory tokenCategory = LexemesMap.getTokenCategory(charValue);
-
-		// System.out.print(charValue+",");
-		// if (tokenCategory != null)
-		// System.out.print(tokenCategory.name()+",");
-		// else
-		// System.out.print("null,");
-		// System.out.println(tokenCategory != null);
 
 		return (tokenCategory != null ? tokenCategory : this.getNonFixedToken(charValue));
 	}
