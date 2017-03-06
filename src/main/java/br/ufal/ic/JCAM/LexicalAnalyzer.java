@@ -7,19 +7,25 @@ import java.util.List;
 
 public class LexicalAnalyzer {
 
-	private static final String REGEX_CHAR = "'(.?)'";
+	private static final String REGEX_ID = "[a-zA-Z][a-zA-Z0-9\\_]*";
 
-	private static final String REGEX_TEXTO = "\"(.*)\"";
+	private static final String REGEX_INTEGER = "[0-9]+";
 
 	private static final String REGEX_REAL = "[0-9]+\\.[0-9]+";
 
-	private static final String REGEX_INTEGER = "[0-9]+";
+	private static final String REGEX_TEXTO = "\"(.*)\"";
+
+	private static final String REGEX_CHAR = "'(.?)'";
+
+	private static final String REGEX_PART_OF_CONST_REAL = "[0-9]+\\.";
+
+	private static final String REGEX_PART_OF_CONST_TEXTO = "\"(.*)";
+
+	private static final String REGEX_PART_OF_CONST_CHAR = "'(.?)";
 
 	private static final String REGEX_LINE_END = "\\r?\\n";
 
 	private static final String REGEX_SPACE = "\\s+";
-
-	private static final String REGEX_ID = "[a-zA-Z][a-zA-Z0-9\\_]*";
 
 	private Token currentToken;
 
@@ -180,11 +186,34 @@ public class LexicalAnalyzer {
 	 * @return true if this can grown
 	 */
 	private boolean canGrown(String charValue) {
-		// TODO implement
-		/*
-		 * verify if this charValue can grown to a valid token (if charValue is
-		 * part of valid token) analyze fixed and non-fixed tokens
-		 */
+
+		// check if this charValue is a fixed token
+		if (LexemesMap.getTokenCategory(charValue) != null)
+			return false;
+
+		// for each lexeme, check if begins with this charValue
+		for (String lexeme : LexemesMap.getKeys()) {
+			if (lexeme.length() > charValue.length() && lexeme.startsWith(charValue))
+				return true;
+		}
+
+		// check if is ID or CONST_INT or CONST_REAL
+		if (this.isID(charValue) || this.isConstInt(charValue) || this.isConstReal(charValue))
+			return true;
+
+		// check if is part of CONST_REAL
+		if (charValue.matches(REGEX_PART_OF_CONST_REAL))
+			return true;
+
+		// check if is CONST_TEXTO or CONST_CHAR
+		if (this.isConstTexto(charValue) || this.isConstChar(charValue))
+			return false;
+
+		// check if is part of CONST_TEXTO or CONST_REAL
+		if (charValue.matches(REGEX_PART_OF_CONST_TEXTO) || charValue.matches(REGEX_PART_OF_CONST_CHAR))
+			return true;
+
+		// invalid token
 		return false;
 	}
 

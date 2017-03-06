@@ -2,6 +2,7 @@ package br.ufal.ic.JCAM;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class LexemesMap {
 
@@ -83,6 +84,10 @@ public class LexemesMap {
 		}
 		
 		return null;
+	}
+	
+	public static Set<String> getKeys() {
+		return lexemes.keySet();
 	}
 	
 }
