@@ -52,8 +52,10 @@ public class LexemesMap {
 		lexemes.put("para", TokenCategory.PR_CMD_PARA);
 		lexemes.put("ate", TokenCategory.PR_CMD_PARA_ATE);
 		lexemes.put("passo", TokenCategory.PR_CMD_PARA_PASSO);
-		lexemes.put("proc", TokenCategory.PR_CMD_PROC);
-		lexemes.put("func", TokenCategory.PR_CMD_FUNC);
+		// TODO tava proc
+		lexemes.put("procedimento", TokenCategory.PR_CMD_PROC);
+		// TODO tava func
+		lexemes.put("funcao", TokenCategory.PR_CMD_FUNC);
 		lexemes.put("retorne", TokenCategory.PR_CMD_RETORNE);
 		
 		lexemes.put("inteiro", TokenCategory.PR_TIPO_INTEIRO);

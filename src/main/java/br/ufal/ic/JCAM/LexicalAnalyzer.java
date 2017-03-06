@@ -2,6 +2,7 @@ package br.ufal.ic.JCAM;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,8 @@ public class LexicalAnalyzer {
 
 	private static final String REGEX_PART_OF_CONST_REAL = "[0-9]+\\.";
 
-	private static final String REGEX_PART_OF_CONST_TEXTO = "\"(.*)";
+	private static final String REGEX_PART_OF_CONST_TEXTO = "\".*[^\"]$";
+	private static final String REGEX_PART_OF_CONST_TEXTO_2 = "\"";
 
 	private static final String REGEX_PART_OF_CONST_CHAR = "'(.?)";
 
@@ -52,44 +54,54 @@ public class LexicalAnalyzer {
 
 		String charValue = "";
 
+		int charInt = this.getNextChar(false);
+		if (charInt == -1)
+			return this.getEOFToken();
+
+		charValue = String.valueOf((char) charInt);
+
+		// skip line comments
+		charInt = this.skipLineComment(charValue, charInt);
+		if (charInt == -1)
+			return this.getEOFToken();
+		charValue = String.valueOf((char) charInt);
+
 		// skip spaces
-		do {
-			int charInt = this.getNextChar();
+		while (this.isSpace(charValue) || this.isLineBreak(charValue)) {
+			charInt = this.getNextChar(true);
 			if (charInt == -1)
 				return this.getEOFToken();
 
 			charValue = String.valueOf((char) charInt);
 
 			// skip line comments
-			if (charValue.equals("/") && this.nextCharIsSlash()) {
-				this.goToLineEnd();
+			charInt = this.skipLineComment(charValue, charInt);
+			if (charInt == -1)
+				return this.getEOFToken();
+			charValue = String.valueOf((char) charInt);
 
-				// go to beginning of next line
-				charInt = this.getNextChar();
-				if (charInt == -1)
-					return this.getEOFToken();
-
-				charValue = String.valueOf((char) charInt);
-			}
-
-		} while (this.isSpace(charValue) || this.isLineBreak(charValue));
+		}
 
 		fixedColumn = this.currentColumnNumber;
 		fixedLine = this.currentLineNumber;
 
 		// try identify this char as Token
 		while (this.isValidToken(charValue) || this.canGrown(charValue)) {
-			if (!this.canGrown(charValue))
+			if (!this.canGrown(charValue)) {
+				++this.currentColumnNumber;
 				break;
+			}
 
-			int charInt = this.getNextChar();
+			charInt = this.getNextChar(true);
 
-			if (charInt == -1 || this.isSpace(String.valueOf((char) charInt))
+			if (charInt == -1
+					|| (!charValue.matches(REGEX_PART_OF_CONST_TEXTO) && this.isSpace(String.valueOf((char) charInt)))
 					|| this.isLineBreak(String.valueOf((char) charInt)) || fixedLine != this.currentLineNumber)
 				break;
 
-			if (this.canGrown(charValue) && !this.isValidToken(charValue + String.valueOf((char) charInt)))
-				break;
+			if (this.canGrown(charValue) && !this.canGrown(charValue + String.valueOf((char) charInt)))
+				if (!charValue.matches(REGEX_PART_OF_CONST_TEXTO))
+					break;
 
 			charValue += String.valueOf((char) charInt);
 		}
@@ -106,12 +118,28 @@ public class LexicalAnalyzer {
 		return this.currentToken;
 	}
 
+	private int skipLineComment(String charValue, int charInt) {
+		while (charValue.equals("/") && this.nextCharIsSlash()) {
+			this.goToLineEnd();
+
+			// go to beginning of next line
+			charInt = this.getNextChar(true);
+			if (charInt == -1)
+				return charInt;
+
+			charValue = String.valueOf((char) charInt);
+		}
+
+		return charInt;
+	}
+
 	/**
 	 * get next char value (0 to 65535)
 	 * 
+	 * @param incrementColumn
 	 * @return next char value, or -1 if reaches end of file
 	 */
-	private int getNextChar() {
+	private int getNextChar(boolean incrementColumn) {
 
 		if (this.lines.isEmpty())
 			return -1;
@@ -124,8 +152,8 @@ public class LexicalAnalyzer {
 			if (this.currentColumnNumber >= this.currentLineString.length()
 					&& (currentLineNumber + 1) >= this.lines.size())
 				return -1;
-
-			++this.currentColumnNumber;
+			if (incrementColumn)
+				++this.currentColumnNumber;
 		}
 
 		// while end of line, get next line
@@ -187,6 +215,23 @@ public class LexicalAnalyzer {
 	 */
 	private boolean canGrown(String charValue) {
 
+		// check if is ID or CONST_INT or CONST_REAL
+		if (this.isID(charValue) || this.isConstInt(charValue) || this.isConstReal(charValue))
+			return true;
+
+		// check if is part of CONST_REAL
+		if (charValue.matches(REGEX_PART_OF_CONST_REAL))
+			return true;
+
+		// check if is part of CONST_TEXTO or CONST_REAL
+		if (charValue.matches(REGEX_PART_OF_CONST_TEXTO_2) || charValue.matches(REGEX_PART_OF_CONST_TEXTO)
+				|| charValue.matches(REGEX_PART_OF_CONST_CHAR))
+			return true;
+
+		// check if is CONST_TEXTO or CONST_CHAR
+		if (this.isConstTexto(charValue) || this.isConstChar(charValue))
+			return false;
+
 		// check if this charValue is a fixed token
 		if (LexemesMap.getTokenCategory(charValue) != null)
 			return false;
@@ -196,22 +241,6 @@ public class LexicalAnalyzer {
 			if (lexeme.length() > charValue.length() && lexeme.startsWith(charValue))
 				return true;
 		}
-
-		// check if is ID or CONST_INT or CONST_REAL
-		if (this.isID(charValue) || this.isConstInt(charValue) || this.isConstReal(charValue))
-			return true;
-
-		// check if is part of CONST_REAL
-		if (charValue.matches(REGEX_PART_OF_CONST_REAL))
-			return true;
-
-		// check if is CONST_TEXTO or CONST_CHAR
-		if (this.isConstTexto(charValue) || this.isConstChar(charValue))
-			return false;
-
-		// check if is part of CONST_TEXTO or CONST_REAL
-		if (charValue.matches(REGEX_PART_OF_CONST_TEXTO) || charValue.matches(REGEX_PART_OF_CONST_CHAR))
-			return true;
 
 		// invalid token
 		return false;
@@ -226,6 +255,13 @@ public class LexicalAnalyzer {
 	private TokenCategory getTokenCategory(String charValue) {
 		// check fixed tokens
 		TokenCategory tokenCategory = LexemesMap.getTokenCategory(charValue);
+
+		// System.out.print(charValue+",");
+		// if (tokenCategory != null)
+		// System.out.print(tokenCategory.name()+",");
+		// else
+		// System.out.print("null,");
+		// System.out.println(tokenCategory != null);
 
 		return (tokenCategory != null ? tokenCategory : this.getNonFixedToken(charValue));
 	}
@@ -264,6 +300,36 @@ public class LexicalAnalyzer {
 
 	private boolean isConstChar(String charValue) {
 		return charValue.matches(REGEX_CHAR);
+	}
+
+	public static void main(String[] args) {
+		String test = "procedimento inicio() {\n" + " escreva(\"Hello World!\");\n" + "}";
+
+		try {
+			BufferedReader bReader = new BufferedReader(new StringReader(test));
+			LexicalAnalyzer lAnalyzer = new LexicalAnalyzer(bReader);
+
+			Token token = lAnalyzer.nextToken();
+			TokenCategory tokenCategory = token.getCategory();
+			while (tokenCategory == null || !tokenCategory.equals(TokenCategory.EOF)) {
+				System.out.print("<");
+				if (tokenCategory == null)
+					System.out.print("null,");
+				else
+					System.out.print(tokenCategory.name() + ",");
+				System.out.print(token.getPosition().getLine() + ",");
+				System.out.println(token.getPosition().getColumn() + ">");
+
+				token = lAnalyzer.nextToken();
+				tokenCategory = token.getCategory();
+			}
+
+			System.out.println("<" + TokenCategory.EOF.name() + "," + token.getPosition().getLine() + ","
+					+ token.getPosition().getColumn() + ">");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
