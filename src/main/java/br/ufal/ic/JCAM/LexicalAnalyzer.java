@@ -7,6 +7,20 @@ import java.util.List;
 
 public class LexicalAnalyzer {
 
+	private static final String REGEX_CHAR = "'(.?)'";
+
+	private static final String REGEX_TEXTO = "\"(.*)\"";
+
+	private static final String REGEX_REAL = "[0-9]+\\.[0-9]+";
+
+	private static final String REGEX_INTEGER = "[0-9]+";
+
+	private static final String REGEX_LINE_END = "\\r?\\n";
+
+	private static final String REGEX_SPACE = "\\s+";
+
+	private static final String REGEX_ID = "[a-zA-Z][a-zA-Z0-9\\_]*";
+
 	private Token currentToken;
 
 	// lines
@@ -31,7 +45,7 @@ public class LexicalAnalyzer {
 		int fixedLine = this.currentLineNumber;
 
 		String charValue = "";
-		
+
 		// skip spaces
 		do {
 			int charInt = this.getNextChar();
@@ -122,17 +136,15 @@ public class LexicalAnalyzer {
 	}
 
 	private boolean isSpace(String value) {
-		return value.matches("\\s+");
+		return value.matches(REGEX_SPACE);
 	}
 
 	private boolean isLineBreak(String value) {
-		return value.matches("\\r?\\n");
+		return value.matches(REGEX_LINE_END);
 	}
 
 	private Token getEOFToken() {
-		this.currentToken = new Token(null, new Position(this.currentLineNumber, this.currentColumnNumber),
-				TokenCategory.EOF);
-		return this.currentToken;
+		return (new Token(null, new Position(this.currentLineNumber, this.currentColumnNumber), TokenCategory.EOF));
 	}
 
 	private boolean nextCharIsSlash() {
@@ -147,8 +159,7 @@ public class LexicalAnalyzer {
 	}
 
 	private Token getUnknownToken(String charValue, int column, int line) {
-		this.currentToken = new Token(charValue, new Position(line, column), null);
-		return this.currentToken;
+		return (new Token(charValue, new Position(line, column), null));
 	}
 
 	/**
@@ -158,8 +169,7 @@ public class LexicalAnalyzer {
 	 * @return true if this is a valid token
 	 */
 	private boolean isValidToken(String charValue) {
-		// TODO implement
-		return false;
+		return this.getTokenCategory(charValue) != null;
 	}
 
 	/**
@@ -171,6 +181,10 @@ public class LexicalAnalyzer {
 	 */
 	private boolean canGrown(String charValue) {
 		// TODO implement
+		/*
+		 * verify if this charValue can grown to a valid token (if charValue is
+		 * part of valid token) analyze fixed and non-fixed tokens
+		 */
 		return false;
 	}
 
@@ -181,7 +195,46 @@ public class LexicalAnalyzer {
 	 * @return a token category, or null
 	 */
 	private TokenCategory getTokenCategory(String charValue) {
-		// TODO Auto-generated method stub
+		// check fixed tokens
+		TokenCategory tokenCategory = LexemesMap.getTokenCategory(charValue);
+
+		return (tokenCategory != null ? tokenCategory : this.getNonFixedToken(charValue));
+	}
+
+	private TokenCategory getNonFixedToken(String charValue) {
+		if (this.isID(charValue)) {
+			return TokenCategory.ID;
+		} else if (this.isConstInt(charValue)) {
+			return TokenCategory.CONST_INT;
+		} else if (this.isConstReal(charValue)) {
+			return TokenCategory.CONST_REAL;
+		} else if (this.isConstTexto(charValue)) {
+			return TokenCategory.CONST_TEXTO;
+		} else if (this.isConstChar(charValue)) {
+			return TokenCategory.CONST_CARACTERE;
+		}
+
 		return null;
 	}
+
+	private boolean isID(String charValue) {
+		return charValue.matches(REGEX_ID);
+	}
+
+	private boolean isConstInt(String charValue) {
+		return charValue.matches(REGEX_INTEGER);
+	}
+
+	private boolean isConstReal(String charValue) {
+		return charValue.matches(REGEX_REAL);
+	}
+
+	private boolean isConstTexto(String charValue) {
+		return charValue.matches(REGEX_TEXTO);
+	}
+
+	private boolean isConstChar(String charValue) {
+		return charValue.matches(REGEX_CHAR);
+	}
+
 }

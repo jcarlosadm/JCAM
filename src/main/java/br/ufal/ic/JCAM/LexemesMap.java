@@ -77,4 +77,12 @@ public class LexemesMap {
 
 	}
 	
+	public static TokenCategory getTokenCategory(String charValue) {
+		if (lexemes.containsKey(charValue)) {
+			return lexemes.get(charValue);
+		}
+		
+		return null;
+	}
+	
 }
