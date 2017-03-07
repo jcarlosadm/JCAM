@@ -84,7 +84,12 @@ public class LexicalAnalyzer {
 
 		fixedColumn = this.currentColumnNumber;
 		fixedLine = this.currentLineNumber;
-
+		
+		
+		// this is not will enter in the next loop. increment to the next analyze
+		if (!this.isValidToken(charValue) && !this.canGrown(charValue))
+			++this.currentColumnNumber;
+		
 		// try identify this char as Token
 		while (this.isValidToken(charValue) || this.canGrown(charValue)) {
 			if (!this.canGrown(charValue)) {
@@ -296,7 +301,9 @@ public class LexicalAnalyzer {
 	}
 
 	public static void main(String[] args) {
-		String test = "procedimento inicio() {\n" + " escreva(\"Hello World!\");\n" + "}";
+		String test = "procedimento inicio() {\n" + " escreva(\"Hello World!\");\n"
+						+ "var _teste : _texto = \"André\";"
+						+ "}";
 
 		try {
 			BufferedReader bReader = new BufferedReader(new StringReader(test));
