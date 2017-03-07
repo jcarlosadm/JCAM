@@ -99,10 +99,9 @@ public class LexicalAnalyzer {
 					|| this.isLineBreak(String.valueOf((char) charInt)) || fixedLine != this.currentLineNumber)
 				break;
 
-			if (this.canGrown(charValue) && !this.canGrown(charValue + String.valueOf((char) charInt)))
-				if (!charValue.matches(REGEX_PART_OF_CONST_TEXTO) || !charValue.matches(REGEX_PART_OF_CONST_TEXTO_2)
-						|| !charValue.matches(REGEX_PART_OF_CONST_CHAR))
-					break;
+			if (!this.isValidToken(charValue + String.valueOf((char) charInt))
+					&& !this.canGrown(charValue + String.valueOf((char) charInt)))
+				break;
 
 			charValue += String.valueOf((char) charInt);
 		}
