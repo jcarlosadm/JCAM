@@ -57,6 +57,8 @@ public class LexemesMap {
 		// TODO tava func
 		lexemes.put("funcao", TokenCategory.PR_CMD_FUNC);
 		lexemes.put("retorne", TokenCategory.PR_CMD_RETORNE);
+		lexemes.put("escreva", TokenCategory.PR_ESCREVA);
+		lexemes.put("leia", TokenCategory.PR_LEIA);
 		
 		lexemes.put("inteiro", TokenCategory.PR_TIPO_INTEIRO);
 		lexemes.put("real", TokenCategory.PR_TIPO_REAL);

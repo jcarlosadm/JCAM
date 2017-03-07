@@ -24,4 +24,17 @@ public class Token {
 		return category;
 	}
 	
+	@Override
+	public String toString() {
+		String category = "";
+		if(this.category != null)
+			category = this.category.toString();
+		
+		return String.format("[ %s, %d %d, %s ]", 
+				this.lexicalValue, 
+				this.position.getLine(), 
+				this.position.getColumn(), 
+				category);
+	}
+	
 }

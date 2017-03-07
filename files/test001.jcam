@@ -1,0 +1,6 @@
+procedimento inicio() {
+	
+	var tes@te : texto = "_An@dré";
+
+	escreva ("Olá Mundo!");
+}
