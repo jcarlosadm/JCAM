@@ -1,0 +1,61 @@
+procedimento inicio(){
+    const tamanho : inteiro = 5;
+    var lista : [inteiro; tamanho] = {4, 7, 2, 8, 1};
+    var pilha = [inteiro; tamanho];
+    
+    var topo : inteiro = 0;
+    var h : inteiro = tamanho - 1;
+    var l : inteiro = 0;
+    var x : inteiro = 0;
+    var i : inteiro = 0;
+    var j : inteiro = 0;
+    var aux : inteiro = 0;
+    var p : inteiro = 0;
+    
+    pilha[topo] = l;
+    topo = topo + 1;
+    pilha[topo] = h;
+    
+    enquanto (topo >= 0) {
+        h = pilha[topo];
+        topo = topo - 1;
+        l = pilha[topo];
+        topo = topo - 1;
+        
+        x = arr[h];
+        i = l - 1;
+        
+        para (j = l) ate (j <= h - 1) passo (j = j + 1) {
+            se (arr[j] <= x) {
+                i = i + 1;
+                aux = arr[i];
+                arr[i] = arr[j];
+                arr[j] = aux;
+            }
+        }
+        
+        aux = arr[i + 1];
+        arr[i + 1] = arr[h];
+        arr[h] = aux;
+        
+        p = i + 1;
+        
+        se ((p - 1) > l) {
+            topo = topo + 1;
+            pilha[topo] = l;
+            topo = topo + 1;
+            pilha[topo] = p - 1;
+        }
+        
+        se ((p + 1) < h) {
+            topo = topo + 1;
+            pilha[topo] = p + 1;
+            topo = topo + 1;
+            pilha[topo] = h;
+        }
+    }
+    
+    para (i = 0) ate (i < tamanho) passo (i = i + 1) {
+        escreva(" " + arr[i] + " ");
+    }
+}

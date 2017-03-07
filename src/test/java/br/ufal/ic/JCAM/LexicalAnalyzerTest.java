@@ -22,11 +22,11 @@ public class LexicalAnalyzerTest {
 	
 	@Test
 	public void test_001() {
-		Assert.assertNotEquals(null, getFileReader("files/test001.jcam"));
+		Assert.assertNotEquals(null, getFileReader("files/fibonacci.jcam"));
 		
 		LexicalAnalyzer lexicalAnalyzer;
 		try {
-			lexicalAnalyzer = new LexicalAnalyzer(getFileReader("files/test001.jcam"));
+			lexicalAnalyzer = new LexicalAnalyzer(getFileReader("files/fibonacci.jcam"));
 			
 			Token currentToken = lexicalAnalyzer.nextToken();
 			while(currentToken.getCategory() != TokenCategory.EOF) {

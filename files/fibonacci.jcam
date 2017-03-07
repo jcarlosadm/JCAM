@@ -1,0 +1,19 @@
+procedimento fibonacci(n : inteiro) {
+    se (n > 0) {
+        var a : inteiro = 0;
+        var b : inteiro = 1;
+        var aux : inteiro = 0;
+        
+        var i : inteiro;
+        para (i = 0) ate (i < n) passo (i = i + 1) {
+            escreva(a);
+            aux = a;
+            a = a + b;
+            b = aux;
+        }
+    }
+}
+
+procedimento inicio() {
+    fibonacci(7);
+}
