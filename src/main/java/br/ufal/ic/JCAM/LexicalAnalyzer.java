@@ -84,12 +84,12 @@ public class LexicalAnalyzer {
 
 		fixedColumn = this.currentColumnNumber;
 		fixedLine = this.currentLineNumber;
-		
-		
-		// this is not will enter in the next loop. increment to the next analyze
+
+		// this is not will enter in the next loop. increment to the next
+		// analyze
 		if (!this.isValidToken(charValue) && !this.canGrown(charValue))
 			++this.currentColumnNumber;
-		
+
 		// try identify this char as Token
 		while (this.isValidToken(charValue) || this.canGrown(charValue)) {
 			if (!this.canGrown(charValue)) {
@@ -100,7 +100,9 @@ public class LexicalAnalyzer {
 			charInt = this.getNextChar(true);
 
 			if (charInt == -1
-					|| (!charValue.matches(REGEX_PART_OF_CONST_TEXTO) && this.isSpace(String.valueOf((char) charInt)))
+					|| ((!charValue.matches(REGEX_PART_OF_CONST_TEXTO)
+							&& !charValue.matches(REGEX_PART_OF_CONST_TEXTO_2))
+							&& this.isSpace(String.valueOf((char) charInt)))
 					|| this.isLineBreak(String.valueOf((char) charInt)) || fixedLine != this.currentLineNumber)
 				break;
 
@@ -301,9 +303,8 @@ public class LexicalAnalyzer {
 	}
 
 	public static void main(String[] args) {
-		String test = "procedimento inicio() {\n" + " escreva(\"Hello World!\");\n"
-						+ "var _teste : _texto = \"André\";"
-						+ "}";
+		String test = "procedimento inicio() {\n" + " escreva(\"Hello World!\");\n" + "var _teste : _texto = \" \";"
+				+ "}";
 
 		try {
 			BufferedReader bReader = new BufferedReader(new StringReader(test));
