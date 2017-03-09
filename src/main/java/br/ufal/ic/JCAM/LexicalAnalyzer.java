@@ -100,8 +100,7 @@ public class LexicalAnalyzer {
 			charInt = this.getNextChar(true);
 
 			if (charInt == -1
-					|| ((!charValue.matches(REGEX_PART_OF_CONST_TEXTO)
-							&& !charValue.matches(REGEX_PART_OF_CONST_TEXTO_2))
+					|| (!charValue.matches(REGEX_PART_OF_CONST_TEXTO) && !charValue.matches(REGEX_PART_OF_CONST_TEXTO_2)
 							&& this.isSpace(String.valueOf((char) charInt)))
 					|| this.isLineBreak(String.valueOf((char) charInt)) || fixedLine != this.currentLineNumber)
 				break;
@@ -235,21 +234,12 @@ public class LexicalAnalyzer {
 				|| charValue.matches(REGEX_PART_OF_CONST_CHAR))
 			return true;
 
-		// check if is CONST_TEXTO or CONST_CHAR
-		if (this.isConstTexto(charValue) || this.isConstChar(charValue))
-			return false;
-
-		// check if this charValue is a fixed token
-		if (LexemesMap.getTokenCategory(charValue) != null)
-			return false;
-
 		// for each lexeme, check if begins with this charValue
 		for (String lexeme : LexemesMap.getKeys()) {
 			if (lexeme.length() > charValue.length() && lexeme.startsWith(charValue))
 				return true;
 		}
 
-		// invalid token
 		return false;
 	}
 

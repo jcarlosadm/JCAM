@@ -11,16 +11,8 @@ public class LexemesMap {
 	static {
 		lexemes = new HashMap<String, TokenCategory>();
 		
-		// ID
-		// CONST_INT
-		// CONST_REAL
-		
-		// CONST_BOOL
 		lexemes.put("verdadeiro", TokenCategory.CONST_BOOL);
 		lexemes.put("falso", TokenCategory.CONST_BOOL);		
-		
-		// CONST_TEXTO
-		// CONST_CARACTERE
 		
 		lexemes.put("var", TokenCategory.PR_CMD_DECL_VAR);
 		lexemes.put("const", TokenCategory.PR_CMD_DECL_CONST);
@@ -52,9 +44,7 @@ public class LexemesMap {
 		lexemes.put("para", TokenCategory.PR_CMD_PARA);
 		lexemes.put("ate", TokenCategory.PR_CMD_PARA_ATE);
 		lexemes.put("passo", TokenCategory.PR_CMD_PARA_PASSO);
-		// TODO tava proc
 		lexemes.put("procedimento", TokenCategory.PR_CMD_PROC);
-		// TODO tava func
 		lexemes.put("funcao", TokenCategory.PR_CMD_FUNC);
 		lexemes.put("retorne", TokenCategory.PR_CMD_RETORNE);
 		lexemes.put("escreva", TokenCategory.PR_ESCREVA);
