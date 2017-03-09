@@ -2,7 +2,6 @@ package br.ufal.ic.JCAM;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -290,37 +289,6 @@ public class LexicalAnalyzer {
 
 	private boolean isConstChar(String charValue) {
 		return charValue.matches(REGEX_CHAR);
-	}
-
-	public static void main(String[] args) {
-		String test = "procedimento inicio() {\n" + " escreva(\"Hello World!\");\n" + "var _teste : _texto = \" \";"
-				+ "}";
-
-		try {
-			BufferedReader bReader = new BufferedReader(new StringReader(test));
-			LexicalAnalyzer lAnalyzer = new LexicalAnalyzer(bReader);
-
-			Token token = lAnalyzer.nextToken();
-			TokenCategory tokenCategory = token.getCategory();
-			while (tokenCategory == null || !tokenCategory.equals(TokenCategory.EOF)) {
-				System.out.print("<");
-				if (tokenCategory == null)
-					System.out.print("null,");
-				else
-					System.out.print(tokenCategory.name() + ",");
-				System.out.print(token.getPosition().getLine() + ",");
-				System.out.println(token.getPosition().getColumn() + ">");
-
-				token = lAnalyzer.nextToken();
-				tokenCategory = token.getCategory();
-			}
-
-			System.out.println("<" + TokenCategory.EOF.name() + "," + token.getPosition().getLine() + ","
-					+ token.getPosition().getColumn() + ">");
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 }
