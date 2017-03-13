@@ -100,6 +100,7 @@ public class LexicalAnalyzer {
 
 			if (charInt == -1
 					|| (!charValue.matches(REGEX_PART_OF_CONST_TEXTO) && !charValue.matches(REGEX_PART_OF_CONST_TEXTO_2)
+							&& !charValue.matches(REGEX_PART_OF_CONST_CHAR)
 							&& this.isSpace(String.valueOf((char) charInt)))
 					|| this.isLineBreak(String.valueOf((char) charInt)) || fixedLine != this.currentLineNumber)
 				break;
