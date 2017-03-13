@@ -26,7 +26,8 @@ public class Token {
 	
 	@Override
 	public String toString() {
-		String category = "";
+		String category = "unknown";
+		
 		if(this.category != null)
 			category = this.category.toString();
 		
