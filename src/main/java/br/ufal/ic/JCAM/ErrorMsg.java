@@ -4,6 +4,7 @@ public enum ErrorMsg {
 	INVALID_ID("digite um identificador válido!"),
 	INVALID_TYPE("digite um tipo válido! (inteiro | booleano | texto | caractere | real)"),
 	CONST_INT("constante inteira esperada!"),
+	INVALID_DECL_GLOBAL("palavra global esperada!"),
 	NOTFOUND_ABRE_COL("[ esperado"),
 	NOTFOUND_FECHA_COL("] esperado"),
 	NOTFOUND_ABRE_PAR("( esperado"),

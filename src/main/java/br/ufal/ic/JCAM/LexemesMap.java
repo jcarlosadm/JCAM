@@ -16,6 +16,7 @@ public class LexemesMap {
 		
 		lexemes.put("var", TokenCategory.PR_CMD_DECL_VAR);
 		lexemes.put("const", TokenCategory.PR_CMD_DECL_CONST);
+		lexemes.put("global", TokenCategory.PR_CMD_DECL_GLOBAL);
 		
 		lexemes.put("=", TokenCategory.OP_ATRIBUICAO);
 		
