@@ -639,8 +639,14 @@ public class SyntaticAnalyzer {
 	}
 
 	private void TR() {
-		// TODO Auto-generated method stub
+		if (this.currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+			System.out.println("TR = \"(\" TR3");
+			this.updateToken();
+			TR3();
+		}
 
+		else
+			this.errorMsg("\"(\" esperado");
 	}
 
 	private void OPU2() {
@@ -660,6 +666,11 @@ public class SyntaticAnalyzer {
 
 	private void TR6() {
 		// TODO Auto-generated method stub
+		TokenCategory categ = this.currentToken.getCategory();
+		
+		if (categ == TokenCategory.ABRE_PAR) {
+			
+		}
 
 	}
 
@@ -684,11 +695,163 @@ public class SyntaticAnalyzer {
 	}
 
 	private void TR2() {
-		// TODO Auto-generated method stub
 
+		if (this.currentToken.getCategory() == TokenCategory.ABRE_COL) {
+			System.out.println("TR2 = AcMatriz");
+			AcMatriz();
+		}
+
+		else if (this.currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+			System.out.println("TR2 = ChFuncProcR");
+			ChFuncProcR();
+		}
+
+		else
+			this.errorMsg("token inesperado");
 	}
 
 	private void TR3() {
+
+		TokenCategory categ = this.currentToken.getCategory();
+
+		if (categ == TokenCategory.ID) {
+			System.out.println("TR3 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB \")\" OPB");
+			this.updateToken();
+			TR2();
+			OPB();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB();
+			} else
+				this.errorMsg("\")\" esperado");
+		}
+
+		else if (categ == TokenCategory.CONST_INT || categ == TokenCategory.CONST_REAL
+				|| categ == TokenCategory.CONST_CARACTERE || categ == TokenCategory.CONST_TEXTO) {
+			System.out.println("TR3 = NUMEROTEXTO OPB2 \")\" OPB2");
+			NUMEROTEXTO();
+			OPB2();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB2();
+			} else
+				this.errorMsg("\")\" esperado");
+		}
+
+		else if (categ == TokenCategory.CONST_BOOL) {
+			System.out.println("TR3 = \"constBool\"(" + this.currentToken.getLexicalValue() + ") OPB3 \")\" OPB3");
+			this.updateToken();
+			OPB3();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB3();
+			} else
+				this.errorMsg("\")\" esperado");
+		}
+
+		else if (categ == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("TR3 = OPU \")\" OPB2");
+			OPU();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB2();
+			} else
+				this.errorMsg("\")\" esperado");
+		}
+
+		else if (categ == TokenCategory.OP_BOOL_NAO) {
+			System.out.println("TR3 = OPU2 \")\" OPB3");
+			OPU2();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB3();
+			} else
+				this.errorMsg("\")\" esperado");
+		}
+
+		else
+			this.errorMsg("token não esperado");
+
+	}
+
+	private void TR4() {
+
+		TokenCategory categ = this.currentToken.getCategory();
+
+		if (categ == TokenCategory.ABRE_PAR) {
+			System.out.println("TR4 = TR7");
+			TR7();
+		}
+
+		else if (categ == TokenCategory.ID) {
+			System.out.println("TR4 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB2");
+			this.updateToken();
+			TR2();
+			OPB2();
+		}
+		
+		else if (categ == TokenCategory.CONST_INT || categ == TokenCategory.CONST_REAL
+				|| categ == TokenCategory.CONST_CARACTERE || categ == TokenCategory.CONST_TEXTO) {
+			System.out.println("TR4 = NUMEROTEXTO OPB2");
+			NUMEROTEXTO();
+			OPB2();
+		}
+		
+		else if (categ == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("TR4 = OPU");
+			OPU();
+		}
+		
+		else this.errorMsg("token não esperado");
+	}
+	
+	private void TR5() {
+		
+		TokenCategory categ = this.currentToken.getCategory();
+		
+		if (categ == TokenCategory.ABRE_PAR) {
+			System.out.println("TR5 = TR9");
+			TR9();
+		}
+		
+		else if (categ == TokenCategory.ID) {
+			System.out.println("TR5 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB4");
+			this.updateToken();
+			TR2();
+			OPB4();
+		}
+		
+		else if (categ == TokenCategory.CONST_INT || categ == TokenCategory.CONST_REAL
+				|| categ == TokenCategory.CONST_CARACTERE || categ == TokenCategory.CONST_TEXTO) {
+			System.out.println("TR5 = NUMEROTEXTO OPB4");
+			NUMEROTEXTO();
+			OPB4();
+		}
+		
+		else if (categ == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("TR5 = OPU3");
+			OPU3();
+		}
+		
+		else this.errorMsg("token não esperado");
+	}
+
+	private void OPU3() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void OPB4() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void TR9() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void TR7() {
 		// TODO Auto-generated method stub
 
 	}
