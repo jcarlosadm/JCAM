@@ -8,32 +8,46 @@ public class SyntaticAnalyzer {
 	private LexicalAnalyzer lexicalAnalyzer;
 	private Token currentToken;
 
+	// se houver um ou mais erros, mudar para false
+	private boolean success = true;
+
 	private static List<TokenCategory> typesCategory;
 	// private static List<TokenCategory> commandsWithScope;
 	// private static List<TokenCategory> commandsWithoutScope;
-	
+
 	static {
 		typesCategory = Arrays.asList(TokenCategory.PR_TIPO_BOOLEANO, TokenCategory.PR_TIPO_CARACTERE,
-				TokenCategory.PR_TIPO_INTEIRO, TokenCategory.PR_TIPO_REAL, TokenCategory.PR_TIPO_TEXTO);	
-	
+				TokenCategory.PR_TIPO_INTEIRO, TokenCategory.PR_TIPO_REAL, TokenCategory.PR_TIPO_TEXTO);
+
 	}
 
 	public SyntaticAnalyzer(LexicalAnalyzer lexicalAnalyzer) {
 		this.lexicalAnalyzer = lexicalAnalyzer;
 	}
 
-	private Boolean updateToken() {
-		Token current = this.lexicalAnalyzer.nextToken();
+	private void updateToken() {
+		this.currentToken = this.lexicalAnalyzer.nextToken();
 
-		if (current != null) {
-			this.currentToken = current;
-
-			return true;
+		if (this.currentToken == null) {
+			this.errorMsg("erro inesperado");
 		}
-		
-		// TODO: Lançar erro: não existem mais tokens para serem analisados
 
-		return false;
+		else {
+			while (this.currentToken.getCategory() == null) {
+				this.errorMsg("token não esperado");
+
+				this.currentToken = this.lexicalAnalyzer.nextToken();
+				if (this.currentToken == null) {
+					this.errorMsg("erro inesperado");
+					break;
+				}
+			}
+		}
+
+	}
+
+	public boolean isSuccess() {
+		return this.success;
 	}
 
 	public Boolean haveToken() {
@@ -44,50 +58,51 @@ public class SyntaticAnalyzer {
 		return false;
 	}
 
-	public void printErrorMsg(ErrorMsg error, Token token) {
-		Position pos = token.getPosition();
-		System.out.println("Token " + token.getLexicalValue() + " inválido na linha: " + pos.getLine().intValue()
-				+ " coluna: " + pos.getColumn().intValue() + ", " + error.getMsg());
-
-		//System.exit(0);
+	private void errorMsg(String msg) {
+		if (this.currentToken == null)
+			System.out.println("erro inesperado");
+		else
+			System.out.println("token: " + this.currentToken.getLexicalValue() + "." + msg + ". linha "
+					+ this.currentToken.getPosition().getLine() + ", coluna "
+					+ this.currentToken.getPosition().getColumn() + ".");
+		this.success = false;
 	}
-	
+
 	public void Escopo() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_CH) {
 			updateToken();
-			
-			if(currentToken.getCategory() == TokenCategory.FECHA_CH) {
+
+			if (currentToken.getCategory() == TokenCategory.FECHA_CH) {
 				updateToken();
-				
+
 				// LCmd();
-				
+
 				System.out.println("escopo válido!");
 			} else {
 				printErrorMsg(ErrorMsg.NOTFOUND_FECHA_CH, this.currentToken);
-			}		
+			}
 		} else {
 			printErrorMsg(ErrorMsg.NOTFOUND_ABRE_CH, this.currentToken);
 		}
-		
+
 	}
-	
+
 	public void LCmd() {
 
 	}
-	
+
 	public void Cmd() {
 		CmdSemEscopo();
-		
+
 		if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 			updateToken();
-					
+
 			//
-			
+
 		}
 	}
-	
-	
-	// TODO: Remover ambiguidade todas elas começam com TokenCategory.ID, qual 
+
+	// TODO: Remover ambiguidade todas elas começam com TokenCategory.ID, qual
 	// produção escolher ???
 	public void CmdSemEscopo() {
 		Atrib(); // = após ID
@@ -96,33 +111,33 @@ public class SyntaticAnalyzer {
 		ChFunc(); // começa com ID, igual a ChProc
 		ChProc(); // coma com ID, igual a ChFunc
 	}
-	
+
 	public void CmdComEscopo() {
 		// Se();
 		// Enquanto();
 		// Para();
 	}
-	
+
 	public void LDeclGlob() {
 		DeclGlob();
-		
-		if (currentToken.getCategory() == TokenCategory.PR_CMD_DECL_GLOBAL) { 
+
+		if (currentToken.getCategory() == TokenCategory.PR_CMD_DECL_GLOBAL) {
 			updateToken();
 			LDeclGlob();
 		}
 	}
-	
+
 	public void DeclGlob() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_DECL_GLOBAL) {
 			updateToken();
-			
+
 			Decl();
-			
+
 			if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 				updateToken();
-				
+
 				System.out.println("def global válida!");
-				
+
 			} else {
 				printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, currentToken);
 			}
@@ -138,8 +153,7 @@ public class SyntaticAnalyzer {
 			if (currentToken.getCategory() == TokenCategory.SE_DOISPONTOS) {
 				updateToken();
 				System.out.println(currentToken);
-				
-				
+
 				DeclTipoAtrib();
 				System.out.println("def atrib tipo valida!");
 			}
@@ -147,47 +161,46 @@ public class SyntaticAnalyzer {
 			printErrorMsg(ErrorMsg.INVALID_ID, this.currentToken);
 		}
 	}
-	
+
 	public void ModDecl() {
 		TokenCategory category = currentToken.getCategory();
-		if (category == TokenCategory.PR_CMD_DECL_CONST ||
-				category == TokenCategory.PR_CMD_DECL_VAR) {
+		if (category == TokenCategory.PR_CMD_DECL_CONST || category == TokenCategory.PR_CMD_DECL_VAR) {
 			updateToken();
 		}
 	}
 
 	public void DeclTipoAtrib() {
 		TokenCategory category = currentToken.getCategory();
-			
+
 		if (typesCategory.contains(category)) {
 			updateToken();
-			
+
 			DeclAtribTipo();
 		} else {
 			System.out.println("matriz " + currentToken);
 			Matriz();
 			DeclAtribMatriz();
 		}
-		
+
 	}
-	
+
 	public void DeclAtribTipo() {
 		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
 			updateToken();
-			
-			VAtrib();			
+
+			VAtrib();
 		}
 	}
-	
+
 	public void DeclAtribMatriz() {
 		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
 			updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_CH) {
 				updateToken();
-				
+
 				LArg();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_CH) {
 					updateToken();
 					System.out.println("def matriz com atribuição válida!");
@@ -201,30 +214,32 @@ public class SyntaticAnalyzer {
 	}
 
 	public void Matriz() {
-		//this.updateToken();
+		// this.updateToken();
 		if (this.currentToken.getCategory() == TokenCategory.ABRE_COL) {
 			if (this.updateToken()) {
-				
+
 				TokenCategory category = this.currentToken.getCategory();
 
 				if (typesCategory.contains(category)) {
-					
+
 					this.updateToken();
-					
+
 					if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-						//System.out.println(currentToken);
-						
+						// System.out.println(currentToken);
+
 						this.updateToken();
 						if (this.currentToken.getCategory() == TokenCategory.CONST_INT) {
 							this.updateToken();
 							if (this.currentToken.getCategory() == TokenCategory.FECHA_COL) {
 								this.updateToken();
-								//if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-									System.out.println("def matriz válida");
-								//	this.updateToken();
-								//} else {
-								//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-								//}
+								// if (this.currentToken.getCategory() ==
+								// TokenCategory.SE_PONTOVIRGULA) {
+								System.out.println("def matriz válida");
+								// this.updateToken();
+								// } else {
+								// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+								// this.currentToken);
+								// }
 							} else {
 								printErrorMsg(ErrorMsg.NOTFOUND_FECHA_COL, this.currentToken);
 							}
@@ -241,14 +256,14 @@ public class SyntaticAnalyzer {
 		} else
 			printErrorMsg(ErrorMsg.NOTFOUND_ABRE_COL, this.currentToken);
 	}
-	
+
 	public void ChVarConst() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			updateToken();
 			AcMatriz();
 		}
 	}
-	
+
 	public void AcMatriz() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
 			updateToken();
@@ -256,12 +271,14 @@ public class SyntaticAnalyzer {
 				updateToken();
 				if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
 					updateToken();
-					//if(this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-						//this.updateToken();
-						System.out.println("def acesso matriz válido");
-					//} else {
-					//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-					//}
+					// if(this.currentToken.getCategory() ==
+					// TokenCategory.SE_PONTOVIRGULA) {
+					// this.updateToken();
+					System.out.println("def acesso matriz válido");
+					// } else {
+					// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+					// this.currentToken);
+					// }
 				} else {
 					printErrorMsg(ErrorMsg.NOTFOUND_FECHA_COL, this.currentToken);
 				}
@@ -270,39 +287,43 @@ public class SyntaticAnalyzer {
 			}
 		}
 	}
-	
+
 	public void Retorno() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_RETORNE) {
 			updateToken();
 			VAtrib();
-			
-			//if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-			//	this.updateToken();
-				System.out.println("def retorne válida!");
-			//} else {
-			//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-			//}
+
+			// if (this.currentToken.getCategory() ==
+			// TokenCategory.SE_PONTOVIRGULA) {
+			// this.updateToken();
+			System.out.println("def retorne válida!");
+			// } else {
+			// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+			// this.currentToken);
+			// }
 		} else {
 			// Erro?
 		}
 	}
-	
+
 	public void Atrib() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			updateToken();
 			AcMatriz();
 			if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
 				updateToken();
-				//System.out.println(this.currentToken);
+				// System.out.println(this.currentToken);
 				VAtrib();
-				
-				//if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-				//	this.updateToken();	
-					System.out.println("def atribuição válida");
-									
-				//} else {
-				//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-				//}
+
+				// if (this.currentToken.getCategory() ==
+				// TokenCategory.SE_PONTOVIRGULA) {
+				// this.updateToken();
+				System.out.println("def atribuição válida");
+
+				// } else {
+				// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+				// this.currentToken);
+				// }
 			} else {
 				printErrorMsg(ErrorMsg.NOTFOUND_OP_ATRIB, this.currentToken);
 			}
@@ -310,60 +331,62 @@ public class SyntaticAnalyzer {
 			printErrorMsg(ErrorMsg.INVALID_ID, this.currentToken);
 		}
 	}
-	
+
 	public void VAtrib() {
 		switch (this.currentToken.getCategory()) {
-			case ID:
-				System.out.println("valido");
-				this.updateToken();				
-				AcMatriz();
-				break;
-				
-			case CONST_INT:
-			case CONST_REAL:				
-			case CONST_BOOL:
-			case CONST_CARACTERE:
-			case CONST_TEXTO:
-				this.updateToken();
-				//if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-					System.out.println("VAtrib tipo válido");
-				//	this.updateToken();
-				//} else {
-				//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-				//}
-				break;
-				
-			default:
-				// Concat();
-				// Expr();
-				// ChFunc();
-				System.out.println("atribuição inválida!");
-				break;
+		case ID:
+			System.out.println("valido");
+			this.updateToken();
+			AcMatriz();
+			break;
+
+		case CONST_INT:
+		case CONST_REAL:
+		case CONST_BOOL:
+		case CONST_CARACTERE:
+		case CONST_TEXTO:
+			this.updateToken();
+			// if (this.currentToken.getCategory() ==
+			// TokenCategory.SE_PONTOVIRGULA) {
+			System.out.println("VAtrib tipo válido");
+			// this.updateToken();
+			// } else {
+			// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+			// this.currentToken);
+			// }
+			break;
+
+		default:
+			// Concat();
+			// Expr();
+			// ChFunc();
+			System.out.println("atribuição inválida!");
+			break;
 		}
 	}
-	
+
 	public void LParam() {
 		Param();
-		//if (this.currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
-			LParamNr();
-		//}
+		// if (this.currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
+		LParamNr();
+		// }
 	}
-	
+
 	public void LParamNr() {
 		if (currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
 			updateToken();
-			
+
 			Param();
-			
-			//System.out.println(this.currentToken);
-			
+
+			// System.out.println(this.currentToken);
+
 			LParamNr();
 		}
 	}
 
 	// TODO: Como tratar o erro e prosseguir a análise? *
 	public void Param() {
-		//this.updateToken();
+		// this.updateToken();
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			updateToken();
 			if (currentToken.getCategory() == TokenCategory.SE_DOISPONTOS) {
@@ -372,12 +395,14 @@ public class SyntaticAnalyzer {
 
 					if (typesCategory.contains(category)) {
 						updateToken();
-						//if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-							System.out.println("def param válido");
-							//this.updateToken();
-						//} else {
-						//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-						//}
+						// if (this.currentToken.getCategory() ==
+						// TokenCategory.SE_PONTOVIRGULA) {
+						System.out.println("def param válido");
+						// this.updateToken();
+						// } else {
+						// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+						// this.currentToken);
+						// }
 
 					} else {
 						printErrorMsg(ErrorMsg.INVALID_TYPE, currentToken);
@@ -388,16 +413,16 @@ public class SyntaticAnalyzer {
 				printErrorMsg(ErrorMsg.NOTFOUND_SE_DOISPONTOS, currentToken);
 				// Situação de erro: Separador ":" esperado
 			}
-		} //else {
-			//printErrorMsg(ErrorMsg.INVALID_ID, this.currentToken);
+		} // else {
+			// printErrorMsg(ErrorMsg.INVALID_ID, this.currentToken);
 			// Situação de erro: ID esperado
-		//}
+			// }
 	}
-	
+
 	public void LFuncProc() {
-		
+
 	}
-	
+
 	// TODO: Falta função CorpoFunc()
 	public void Func() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_FUNC) {
@@ -407,27 +432,27 @@ public class SyntaticAnalyzer {
 				if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 					updateToken();
 					LParam();
-					
+
 					if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 						updateToken();
-						
+
 						if (currentToken.getCategory() == TokenCategory.SE_DOISPONTOS) {
 							updateToken();
-							
+
 							if (typesCategory.contains(currentToken.getCategory())) {
 								updateToken();
-								
+
 								if (currentToken.getCategory() == TokenCategory.ABRE_CH) {
 									updateToken();
-									
+
 									// CorpoFunc();
-									
-									if(currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
+
+									if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 										updateToken();
-										
-										if(currentToken.getCategory() == TokenCategory.FECHA_CH) {
+
+										if (currentToken.getCategory() == TokenCategory.FECHA_CH) {
 											updateToken();
-											
+
 											System.out.println("def func válida!");
 										} else {
 											printErrorMsg(ErrorMsg.NOTFOUND_FECHA_CH, currentToken);
@@ -444,14 +469,14 @@ public class SyntaticAnalyzer {
 						} else {
 							printErrorMsg(ErrorMsg.NOTFOUND_SE_DOISPONTOS, currentToken);
 						}
-						
+
 					} else {
 						printErrorMsg(ErrorMsg.NOTFOUND_FECHA_PAR, currentToken);
 					}
-					
+
 				} else {
 					printErrorMsg(ErrorMsg.NOTFOUND_ABRE_PAR, currentToken);
-				}			
+				}
 			} else {
 				printErrorMsg(ErrorMsg.INVALID_ID, currentToken);
 			}
@@ -479,13 +504,15 @@ public class SyntaticAnalyzer {
 						updateToken();
 						Escopo();
 
-						//if (this.currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-						//	this.updateToken();
-							System.out.println("def proc válido");
+						// if (this.currentToken.getCategory() ==
+						// TokenCategory.SE_PONTOVIRGULA) {
+						// this.updateToken();
+						System.out.println("def proc válido");
 
-						//} else {
-						//	printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA, this.currentToken);
-						//}
+						// } else {
+						// printErrorMsg(ErrorMsg.NOTFOUND_SE_PONTOVIRGULA,
+						// this.currentToken);
+						// }
 					} else {
 						printErrorMsg(ErrorMsg.NOTFOUND_FECHA_PAR, currentToken);
 					}
@@ -500,16 +527,16 @@ public class SyntaticAnalyzer {
 		}
 
 	}
-	
+
 	public void ChFunc() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				LArg();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
 					System.out.println("def ch func valida!");
@@ -521,23 +548,23 @@ public class SyntaticAnalyzer {
 			}
 		}
 	}
-	
+
 	public void Inicio() {
 		if (currentToken.getCategory() == TokenCategory.PR_INICIO) {
 			updateToken(); // token agr passa a ser (
-			
+
 		}
 	}
-	
+
 	public void ChProc() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			updateToken();
-		
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				LArg();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
 					System.out.println("def ch proc válida!");
@@ -549,27 +576,122 @@ public class SyntaticAnalyzer {
 			}
 		}
 	}
-	
+
 	public void LArg() {
 		VAtrib();
-		
-		//if(this.currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
-			LArgNr();
-		//}
+
+		// if(this.currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
+		LArgNr();
+		// }
 	}
 
 	public void LArgNr() {
-		if(this.currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
+		if (this.currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
 			this.updateToken();
 			VAtrib();
-			
+
 			LArgNr();
 		} else {
-			
+
 		}
 	}
-	
 
+	public void Expr() {
+		TokenCategory tkCateg = this.currentToken.getCategory();
+
+		if (tkCateg == TokenCategory.ABRE_PAR) {
+			System.out.println("Expr = TR");
+			TR();
+		}
+
+		else if (tkCateg == TokenCategory.ID) {
+			System.out.println("Expr = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB");
+			this.updateToken();
+			TR2();
+			OPB();
+		}
+
+		else if (tkCateg == TokenCategory.CONST_INT || tkCateg == TokenCategory.CONST_REAL
+				|| tkCateg == TokenCategory.CONST_CARACTERE || tkCateg == TokenCategory.CONST_TEXTO) {
+			System.out.println("Expr = NUMEROTEXTO OPB2");
+			NUMEROTEXTO();
+			OPB2();
+		}
+
+		else if (tkCateg == TokenCategory.CONST_BOOL) {
+			System.out.println("Expr = \"constBool\"(" + this.currentToken.getLexicalValue() + ") OPB3");
+			this.updateToken();
+			OPB3();
+		}
+
+		else if (tkCateg == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("Expr = OPU");
+			OPU();
+		}
+
+		else if (tkCateg == TokenCategory.OP_BOOL_NAO) {
+			System.out.println("Expr = OPU2");
+			OPU2();
+		}
+
+		else
+			errorMsg("token não esperado");
+	}
+
+	private void TR() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void OPU2() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void OPU() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void NUMEROTEXTO() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void TR6() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void TR11() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void OPB3() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void OPB2() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void OPB() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void TR2() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void TR3() {
+		// TODO Auto-generated method stub
+
+	}
 
 	public void run() {
 
@@ -578,7 +700,7 @@ public class SyntaticAnalyzer {
 		// }
 
 		// TODO: remover após testes ~> arquivo testes.jcam
-		if(this.updateToken()) {
+		if (this.updateToken()) {
 			Param();
 			Param();
 			Matriz();
