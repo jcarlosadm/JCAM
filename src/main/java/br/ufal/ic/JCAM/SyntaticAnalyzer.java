@@ -127,6 +127,8 @@ public class SyntaticAnalyzer {
 			case ID:
 			case PR_CMD_DECL_VAR:
 			case PR_CMD_DECL_CONST:
+			case PR_ESCREVA:
+			case PR_LEIA:
 				CmdSemEscopo();
 				
 				if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
