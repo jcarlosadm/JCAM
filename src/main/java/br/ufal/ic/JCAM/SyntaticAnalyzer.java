@@ -1198,11 +1198,11 @@ public class SyntaticAnalyzer {
 			break;
 
 		case OP_ARIT_ADD:
-			System.out.println("TR18 = OPU4 \")\" OPB3");
+			System.out.println("TR18 = OPU4 \")\" OPB5");
 			OPU4();
 			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 				this.updateToken();
-				OPB3();
+				OPB5();
 			} else
 				this.errorMsg("\")\" esperado");
 			break;
