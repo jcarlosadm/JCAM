@@ -43,19 +43,6 @@ public class SyntaticAnalyzer {
 				}
 			}
 		}
-
-	}
-
-	public boolean isSuccess() {
-		return this.success;
-	}
-
-	public Boolean haveToken() {
-		if (this.currentToken.getCategory() != TokenCategory.EOF) {
-			return true;
-		}
-
-		return false;
 	}
 
 	private void errorMsg(String msg) {
@@ -67,29 +54,28 @@ public class SyntaticAnalyzer {
 					+ this.currentToken.getPosition().getColumn() + ".");
 		this.success = false;
 	}
-	
-	public void Programa() {
+
+	private void Programa() {
 		System.out.println("Programa = LOptDecl Inicio");
-		
+
 		LOptDecl();
 		Inicio();
 	}
-	
-	public void LOptDecl() {
-		System.out.println("LOptDecl = LDeclGlob LFuncProc");
-		
-		LDeclGlob();
-		LFuncProc();		
-	}
-	
 
-	public void Escopo() {
+	private void LOptDecl() {
+		System.out.println("LOptDecl = LDeclGlob LFuncProc");
+
+		LDeclGlob();
+		LFuncProc();
+	}
+
+	private void Escopo() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_CH) {
 			System.out.println("Escopo = \"{\" LCmd \"}\"");
 			updateToken();
 
 			LCmd();
-			
+
 			if (currentToken.getCategory() == TokenCategory.FECHA_CH) {
 				updateToken();
 			} else {
@@ -101,123 +87,122 @@ public class SyntaticAnalyzer {
 
 	}
 
-	public void LCmd() {
+	private void LCmd() {
 		switch (currentToken.getCategory()) {
-			case ID:
-			case PR_CMD_DECL_VAR:
-			case PR_CMD_DECL_CONST:
-			case PR_CMD_SE:
-			case PR_CMD_ENQUANTO:
-			case PR_CMD_PARA:
-			case PR_ESCREVA:
-			case PR_LEIA:
-				System.out.println("LCmd = Cmd LCmd");
-				Cmd();
-				LCmd();
-				break;
-				
-			default:
-				System.out.println("LCmd = epsilon");
-				break;
+		case ID:
+		case PR_CMD_DECL_VAR:
+		case PR_CMD_DECL_CONST:
+		case PR_CMD_SE:
+		case PR_CMD_ENQUANTO:
+		case PR_CMD_PARA:
+		case PR_ESCREVA:
+		case PR_LEIA:
+			System.out.println("LCmd = Cmd LCmd");
+			Cmd();
+			LCmd();
+			break;
+
+		default:
+			System.out.println("LCmd = epsilon");
+			break;
 		}
 	}
 
-	public void Cmd() {
+	private void Cmd() {
 		switch (currentToken.getCategory()) {
-			case ID:
-			case PR_CMD_DECL_VAR:
-			case PR_CMD_DECL_CONST:
-			case PR_ESCREVA:
-			case PR_LEIA:
-				CmdSemEscopo();
-				
-				if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
-					updateToken();
-				} else {
-					errorMsg("\";\" esperado");
-				}
-				
-				break;
-				
-			case PR_CMD_SE:
-			case PR_CMD_ENQUANTO:
-			case PR_CMD_PARA:
-				//updateToken();
-				CmdComEscopo();
-				break;
+		case ID:
+		case PR_CMD_DECL_VAR:
+		case PR_CMD_DECL_CONST:
+		case PR_ESCREVA:
+		case PR_LEIA:
+			CmdSemEscopo();
 
-			default:
-				errorMsg("token não esperado");
-				break;
-		}
-	}
-
-	public void CmdSemEscopo() {
-		switch (currentToken.getCategory()) {
-			case ID:
-				System.out.println("CmdSemEscopo = \"id\" CmdSemEscopoR");
+			if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 				updateToken();
-				CmdSemEscopoR();
-				break;
-			
-			case PR_CMD_DECL_VAR:
-			case PR_CMD_DECL_CONST:
-				System.out.println("CmdSemEscopo = Decl");
-				Decl();
-				break;
-				
-			case PR_ESCREVA:
-				System.out.println("CmdSemEscopo = Escreva");
-				Escreva();
-				break;
-				
-			case PR_LEIA:
-				System.out.println("CmdSemEscopo = Leia");
-				Leia();
-				break;
+			} else {
+				errorMsg("\";\" esperado");
+			}
 
-			default:
-				errorMsg("token não esperado");
-				break;
+			break;
+
+		case PR_CMD_SE:
+		case PR_CMD_ENQUANTO:
+		case PR_CMD_PARA:
+			CmdComEscopo();
+			break;
+
+		default:
+			errorMsg("token não esperado");
+			break;
 		}
 	}
-	
-	public void Escreva() {
+
+	private void CmdSemEscopo() {
+		switch (currentToken.getCategory()) {
+		case ID:
+			System.out.println("CmdSemEscopo = \"id\"(" + currentToken.getLexicalValue() + ") CmdSemEscopoR");
+			updateToken();
+			CmdSemEscopoR();
+			break;
+
+		case PR_CMD_DECL_VAR:
+		case PR_CMD_DECL_CONST:
+			System.out.println("CmdSemEscopo = Decl");
+			Decl();
+			break;
+
+		case PR_ESCREVA:
+			System.out.println("CmdSemEscopo = Escreva");
+			Escreva();
+			break;
+
+		case PR_LEIA:
+			System.out.println("CmdSemEscopo = Leia");
+			Leia();
+			break;
+
+		default:
+			errorMsg("token não esperado");
+			break;
+		}
+	}
+
+	private void Escreva() {
 		if (currentToken.getCategory() == TokenCategory.PR_ESCREVA) {
 			System.out.println("Escreva = \"escreva\" \"(\" Expr \")\"");
 			updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				Expr();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
 				} else {
 					errorMsg("\")\" esperado");
 				}
 			} else {
-				errorMsg("\"(\" esperado");				
+				errorMsg("\"(\" esperado");
 			}
 		} else {
-			errorMsg("\"escreva\" esperado");	
+			errorMsg("\"escreva\" esperado");
 		}
 	}
-	
-	public void Leia() {
+
+	private void Leia() {
 		if (currentToken.getCategory() == TokenCategory.PR_LEIA) {
 			System.out.println("Leia = \"leia\" \"(\" \"id\" AcMatriz \")\"");
 			updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				if (currentToken.getCategory() == TokenCategory.ID) {
 					updateToken();
-					
+
 					AcMatriz();
-					
+
 					if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 						updateToken();
 					} else {
@@ -233,70 +218,69 @@ public class SyntaticAnalyzer {
 			errorMsg("\"leia\" esperado");
 		}
 	}
-	
-	public void CmdSemEscopoR() {
+
+	private void CmdSemEscopoR() {
 		switch (currentToken.getCategory()) {
-		
-			case ABRE_PAR:
-				System.out.println("CmdSemEscopoR = ChFuncProcR");
-				ChFuncProcR();
-				break;
-	
-			default:
-				System.out.println("CmdSemEscopoR = AcMatriz CmdSemEscopoR2");
-				AcMatriz();
-				CmdSemEscopoR2();
-				break;
-		}		
-	}
-	
-	public void CmdSemEscopoR2() {
-		switch (currentToken.getCategory()) {
-			case OP_ATRIBUICAO:
-				System.out.println("CmdSemEscopoR2 = AtribR");
-				AtribR();
-				break;
-	
-			default:
-				System.out.println("CmdSemEscopoR2 = epsilon");
-				break;
+
+		case ABRE_PAR:
+			System.out.println("CmdSemEscopoR = ChFuncProcR");
+			ChFuncProcR();
+			break;
+
+		default:
+			System.out.println("CmdSemEscopoR = AcMatriz CmdSemEscopoR2");
+			AcMatriz();
+			CmdSemEscopoR2();
+			break;
 		}
 	}
 
-
-	public void CmdComEscopo() {
+	private void CmdSemEscopoR2() {
 		switch (currentToken.getCategory()) {
-			case PR_CMD_SE:
-				System.out.println("CmdComEscopo = Se");
-				Se();
-				break;
-				
-			case PR_CMD_ENQUANTO:
-				System.out.println("CmdComEscopo = Enquanto");
-				Enquanto();
-				break;
-				
-			case PR_CMD_PARA:
-				System.out.println("CmdComEscopo = Para");
-				Para();
-				break;
-	
-			default:
-				errorMsg("token não esperado");
-				break;
+		case OP_ATRIBUICAO:
+			System.out.println("CmdSemEscopoR2 = AtribR");
+			AtribR();
+			break;
+
+		default:
+			System.out.println("CmdSemEscopoR2 = epsilon");
+			break;
 		}
 	}
-	
-	public void Se() {
+
+	private void CmdComEscopo() {
+		switch (currentToken.getCategory()) {
+		case PR_CMD_SE:
+			System.out.println("CmdComEscopo = Se");
+			Se();
+			break;
+
+		case PR_CMD_ENQUANTO:
+			System.out.println("CmdComEscopo = Enquanto");
+			Enquanto();
+			break;
+
+		case PR_CMD_PARA:
+			System.out.println("CmdComEscopo = Para");
+			Para();
+			break;
+
+		default:
+			errorMsg("token não esperado");
+			break;
+		}
+	}
+
+	private void Se() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_SE) {
 			System.out.println("Se = \"se\" \"(\" TR6 \")\" Escopo Senao");
 			updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-			
+
 				TR6();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
 
@@ -312,31 +296,31 @@ public class SyntaticAnalyzer {
 			errorMsg("\"se\" esperado");
 		}
 	}
-	
-	public void Senao() {
+
+	private void Senao() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_SENAO) {
 			System.out.println("Senao = \"senao\" Escopo");
 			updateToken();
-			
+
 			Escopo();
 		} else {
 			System.out.println("Senao = epsilon");
 		}
 	}
-	
-	public void Enquanto() {
+
+	private void Enquanto() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_ENQUANTO) {
 			System.out.println("Enquanto = \"enquanto\" \"(\" TR6 \")\" Escopo");
 			this.updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				TR6();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
-				
+
 					Escopo();
 				} else {
 					errorMsg("\")\" esperado");
@@ -345,45 +329,46 @@ public class SyntaticAnalyzer {
 				errorMsg("\"(\" esperado");
 			}
 		} else {
-			errorMsg("\"enquanto\" esperado");			
+			errorMsg("\"enquanto\" esperado");
 		}
 	}
-	
-	public void Para() {
+
+	private void Para() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_PARA) {
-			System.out.println("Para = \"para\" \"(\" ParaExpr \")\" \"ate\" \"(\" TR6 \")\" \"passo\" \"(\" ParaExpr \")\" Escopo");
+			System.out.println(
+					"Para = \"para\" \"(\" ParaExpr \")\" \"ate\" \"(\" TR6 \")\" \"passo\" \"(\" ParaExpr \")\" Escopo");
 			updateToken();
-			
+
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				ParaExpr();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
-					
+
 					if (currentToken.getCategory() == TokenCategory.PR_CMD_PARA_ATE) {
 						updateToken();
-						
+
 						if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 							updateToken();
-							
+
 							TR6();
-							
+
 							if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 								updateToken();
-								
+
 								if (currentToken.getCategory() == TokenCategory.PR_CMD_PARA_PASSO) {
 									updateToken();
-									
+
 									if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 										updateToken();
-										
+
 										ParaExpr();
-										
+
 										if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 											updateToken();
-											
+
 											Escopo();
 										} else {
 											errorMsg("\")\" esperado");
@@ -413,55 +398,55 @@ public class SyntaticAnalyzer {
 			errorMsg("\"para\" esperado");
 		}
 	}
-	
-	public void ParaExpr() {
+
+	private void ParaExpr() {
 		switch (currentToken.getCategory()) {
-			case ID:
-				System.out.println("ParaExpr = \"id\" AcMatriz ParaExprR");
-				this.updateToken();
-				AcMatriz();
-				ParaExprR();
-				break;
-				
-			case PR_CMD_DECL_VAR:
-			case PR_CMD_DECL_CONST:
-				System.out.println("ParaExpr = Decl");
-				Decl();
-				
-			default:
-				errorMsg("token não esperado");
-				break;
-		}	
+		case ID:
+			System.out.println("ParaExpr = \"id\"(" + currentToken.getLexicalValue() + ") AcMatriz ParaExprR");
+			updateToken();
+			AcMatriz();
+			ParaExprR();
+			break;
+
+		case PR_CMD_DECL_VAR:
+		case PR_CMD_DECL_CONST:
+			System.out.println("ParaExpr = Decl");
+			Decl();
+
+		default:
+			errorMsg("token não esperado");
+			break;
+		}
 	}
-	
-	public void ParaExprR() {
+
+	private void ParaExprR() {
 		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
 			System.out.println("ParaExprR = AtribR");
-			
+
 			AtribR();
 		} else {
 			System.out.println("ParaExprR = epsilon");
 		}
 	}
 
-	public void LDeclGlob() {
+	private void LDeclGlob() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_DECL_GLOBAL) {
 			System.out.println("LDeclGlob = DeclGlob \";\" LDeclGlob");
 			DeclGlob();
-			
-			if(currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
+
+			if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 				updateToken();
-				
+
 				LDeclGlob();
 			} else {
 				errorMsg("\";\" esperado");
-			}			
+			}
 		} else {
 			System.out.println("LDeclGlob = epsilon");
 		}
 	}
 
-	public void DeclGlob() {
+	private void DeclGlob() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_DECL_GLOBAL) {
 			System.out.println("DeclGlob = \"global\" Decl");
 
@@ -470,7 +455,7 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void Decl() {
+	private void Decl() {
 		System.out.println("Decl = ModDecl \"id\" \":\" DeclTipoAtrib");
 		ModDecl();
 		if (currentToken.getCategory() == TokenCategory.ID) {
@@ -484,30 +469,30 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void ModDecl() {
+	private void ModDecl() {
 		TokenCategory category = currentToken.getCategory();
 		if (category == TokenCategory.PR_CMD_DECL_CONST) {
 			System.out.println("ModDecl = \"const\"");
 			updateToken();
 		} else if (category == TokenCategory.PR_CMD_DECL_VAR) {
-			System.out.println("ModDecl = \"var\"");			
+			System.out.println("ModDecl = \"var\"");
 			updateToken();
 		} else {
 			errorMsg("token não esperado");
 		}
 	}
 
-	public void DeclTipoAtrib() {
+	private void DeclTipoAtrib() {
 		TokenCategory category = currentToken.getCategory();
 
 		if (typesCategory.contains(category)) {
-			System.out.println("DeclTipoAtrib = \"tipo\" DeclAtribTipo");
+			System.out.println("DeclTipoAtrib = \"tipo\"(" + currentToken.getLexicalValue() + ") DeclAtribTipo");
 			updateToken();
-	
+
 			DeclAtribTipo();
 		} else if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
 			System.out.println("DeclTipoAtrib = Matriz DeclAtribMatriz");
-			
+
 			Matriz();
 			DeclAtribMatriz();
 		} else {
@@ -516,20 +501,21 @@ public class SyntaticAnalyzer {
 
 	}
 
-	public void DeclAtribTipo() {
+	private void DeclAtribTipo() {
 		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
-			System.out.println("DeclAtribTipo = \"opatrib\" VAtrib");
+			System.out.println("DeclAtribTipo = \"opatrib\"(" + currentToken.getLexicalValue() + ") VAtrib");
 			updateToken();
-			
+
 			VAtrib();
 		} else {
 			System.out.println("DeclAtribTipo = epsilon");
 		}
 	}
 
-	public void DeclAtribMatriz() {
+	private void DeclAtribMatriz() {
 		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
-			System.out.println("DeclAtribMatriz = \"opatrib\" \"{\" LArg \"}\"");
+			System.out
+					.println("DeclAtribMatriz = \"opatrib\"(" + currentToken.getLexicalValue() + ") \"{\" LArg \"}\"");
 			updateToken();
 
 			if (currentToken.getCategory() == TokenCategory.ABRE_CH) {
@@ -543,13 +529,14 @@ public class SyntaticAnalyzer {
 					errorMsg("\"}\" esperado");
 				}
 			} else {
-				errorMsg("\"{\" esperado");			}
+				errorMsg("\"{\" esperado");
+			}
 		} else {
 			System.out.println("DeclAtribMatriz = epsilon");
 		}
 	}
 
-	public void Matriz() {
+	private void Matriz() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
 			System.out.println("Matriz = \"[\" \"tipo\" \";\" MatrizTamanho \"]\"");
 			updateToken();
@@ -560,9 +547,9 @@ public class SyntaticAnalyzer {
 
 				if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 					updateToken();
-					
+
 					MatrizTamanho();
-					
+
 					if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
 						updateToken();
 					} else {
@@ -580,34 +567,34 @@ public class SyntaticAnalyzer {
 	}
 
 	private void MatrizTamanho() {
-		if(this.currentToken.getCategory() == TokenCategory.ID) {
-			System.out.println("MatrizTamanho = \"id\"("+this.currentToken.getLexicalValue()+") AcMatriz");
+		if (this.currentToken.getCategory() == TokenCategory.ID) {
+			System.out.println("MatrizTamanho = \"id\"(" + this.currentToken.getLexicalValue() + ") AcMatriz");
 			this.updateToken();
 			AcMatriz();
 		}
-		
+
 		else if (this.currentToken.getCategory() == TokenCategory.CONST_INT) {
-			System.out.println("MatrizTamanho = \"constInt\"("+this.currentToken.getLexicalValue()+")");
+			System.out.println("MatrizTamanho = \"constInt\"(" + this.currentToken.getLexicalValue() + ")");
 			this.updateToken();
 		}
-		
+
 		else
 			this.errorMsg("token não esperado");
 	}
 
-	public void ChVarConst() {
+	private void ChVarConst() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
-			System.out.println("ChVarConst = \"id\" AcMatriz");
+			System.out.println("ChVarConst = \"id\"(" + currentToken.getLexicalValue() + ") AcMatriz");
 			updateToken();
 			AcMatriz();
 		}
 	}
 
-	public void AcMatriz() {
+	private void AcMatriz() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
-            System.out.println("AcMatriz = \"[\" MatrizTamanho \"]\"");
+			System.out.println("AcMatriz = \"[\" MatrizTamanho \"]\"");
 			updateToken();
-			
+
 			MatrizTamanho();
 			if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
 				updateToken();
@@ -619,26 +606,26 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void Retorno() {
+	private void Retorno() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_RETORNE) {
-            System.out.println("Retorno = \"retorne\"("+this.currentToken.getLexicalValue()+") VAtrib");
-            updateToken();
-			VAtrib();			
+			System.out.println("Retorno = \"retorne\"(" + this.currentToken.getLexicalValue() + ") VAtrib");
+			updateToken();
+			VAtrib();
 		} else {
 			errorMsg("\"retorne\" esperado");
 		}
 	}
 
-	public void Atrib() {
+	private void Atrib() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
-			System.out.println("Atrib = \"id\" AcMatriz AtribR");
+			System.out.println("Atrib = \"id\"(" + currentToken.getLexicalValue() + ") AcMatriz AtribR");
 			updateToken();
-			
+
 			AcMatriz();
 			if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
 				updateToken();
-				
-				AtribR();	
+
+				AtribR();
 			} else {
 				errorMsg("\"=\" esperado");
 			}
@@ -646,39 +633,36 @@ public class SyntaticAnalyzer {
 			errorMsg("\"id\" inválido");
 		}
 	}
-	
-	
-	public void AtribR() {
+
+	private void AtribR() {
 		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
-			System.out.println("AtribR = \"opatrib\" VAtrib");
+			System.out.println("AtribR = \"opatrib\"(" + currentToken.getLexicalValue() + ") VAtrib");
 			updateToken();
-			
+
 			VAtrib();
 		} else {
 			errorMsg("\"=\" esperado");
 		}
 	}
 
-	public void VAtrib() {
+	private void VAtrib() {
 		System.out.println("VAtrib = Expr");
 		Expr();
 	}
-	
 
-
-	public void LParam() {
+	private void LParam() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			System.out.println("LParam = Param LParamNr");
-			
+
 			Param();
 			LParamNr();
 		} else {
 			System.out.println("LParam = epsilon");
 		}
-		
+
 	}
 
-	public void LParamNr() {
+	private void LParamNr() {
 		if (currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
 			System.out.println("LParamNr = \",\" Param LParamNr");
 			updateToken();
@@ -690,13 +674,13 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void Param() {
+	private void Param() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
-			System.out.println("Param = \"id\" \":\" \"tipo\"");
+			System.out.println("Param = \"id\"(" + currentToken.getLexicalValue() + ") \":\" \"tipo\"");
 			updateToken();
 			if (currentToken.getCategory() == TokenCategory.SE_DOISPONTOS) {
 				updateToken();
-			
+
 				TokenCategory category = currentToken.getCategory();
 
 				if (typesCategory.contains(category)) {
@@ -704,7 +688,7 @@ public class SyntaticAnalyzer {
 				} else {
 					errorMsg("tipo inválido");
 				}
-				
+
 			} else {
 				errorMsg("\":\" esperado");
 			}
@@ -713,7 +697,7 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void LFunc() {
+	private void LFunc() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_FUNC) {
 			System.out.println("LFunc = Func LFunc");
 			Func();
@@ -722,37 +706,38 @@ public class SyntaticAnalyzer {
 			System.out.println("LFunc = epsilon");
 		}
 	}
-	
-	public void LFuncProc() {
+
+	private void LFuncProc() {
 		switch (currentToken.getCategory()) {
-			case PR_CMD_FUNC:
-				System.out.println("LFuncProc = LFunc LFuncProc");
-				LFunc();
-				LFuncProc();								
-				break;
-				
-			case PR_CMD_PROC:
-				LProc();
-				LFuncProc();
-				break;
-	
-			default:
-				System.out.println("LFuncProc = epsilon");
-				break;
+		case PR_CMD_FUNC:
+			System.out.println("LFuncProc = LFunc LFuncProc");
+			LFunc();
+			LFuncProc();
+			break;
+
+		case PR_CMD_PROC:
+			LProc();
+			LFuncProc();
+			break;
+
+		default:
+			System.out.println("LFuncProc = epsilon");
+			break;
 		}
 
 	}
-	
-	public void CorpoFunc() {
+
+	private void CorpoFunc() {
 		System.out.println("CorpoFunc = LCmd Retorno");
 		LCmd();
 		Retorno();
 	}
 
-	public void Func() {
+	private void Func() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_FUNC) {
-			System.out.println("Func = \"funcao\" \"id\" \"(\" LParam \")\" \":\" \"tipo\" \"{\" CorpoFunc \";\" \"}\"");
-			
+			System.out
+					.println("Func = \"funcao\" \"id\" \"(\" LParam \")\" \":\" \"tipo\" \"{\" CorpoFunc \";\" \"}\"");
+
 			updateToken();
 			if (currentToken.getCategory() == TokenCategory.ID) {
 				updateToken();
@@ -808,7 +793,7 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void LProc() {
+	private void LProc() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_PROC) {
 			System.out.println("LProc = Proc LProc");
 			Proc();
@@ -818,7 +803,7 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void Proc() {
+	private void Proc() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_PROC) {
 			System.out.println("Proc = \"procedimento\" \"id\" \"(\" LParam \")\" Escopo\"");
 			updateToken();
@@ -845,12 +830,12 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void ChFuncProcR() {
+	private void ChFuncProcR() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 			System.out.println("ChFuncProcR = \"(\" LArg \")\"");
 			updateToken();
 			LArg();
-			
+
 			if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 				updateToken();
 			} else {
@@ -861,18 +846,18 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void Inicio() {
+	private void Inicio() {
 		if (currentToken.getCategory() == TokenCategory.PR_INICIO) {
 			System.out.println("Inicio = \"inicio\" \"(\" \")\" Escopo");
-			
-			updateToken(); 
+
+			updateToken();
 
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
-				
+
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
-					updateToken();		
-					
+					updateToken();
+
 					Escopo();
 				} else {
 					errorMsg("\")\" esperado");
@@ -885,33 +870,33 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void LArg() {
+	private void LArg() {
 		switch (currentToken.getCategory()) {
-			case ABRE_PAR:
-			case ID:
-			case CONST_INT:
-			case CONST_REAL:
-			case CONST_CARACTERE:
-			case CONST_TEXTO:
-			case CONST_BOOL:
-			case OP_ARIT_ADD:
-			case OP_BOOL_NAO:
-				System.out.println("LArg = VAtrib LArgNr");
-				VAtrib();
-				LArgNr();
-				break;
+		case ABRE_PAR:
+		case ID:
+		case CONST_INT:
+		case CONST_REAL:
+		case CONST_CARACTERE:
+		case CONST_TEXTO:
+		case CONST_BOOL:
+		case OP_ARIT_ADD:
+		case OP_BOOL_NAO:
+			System.out.println("LArg = VAtrib LArgNr");
+			VAtrib();
+			LArgNr();
+			break;
 
-			default:
-				System.out.println("LArg = epsilon");
-				break;
+		default:
+			System.out.println("LArg = epsilon");
+			break;
 		}
 	}
 
-	public void LArgNr() {
+	private void LArgNr() {
 		if (currentToken.getCategory() == TokenCategory.SE_VIRGULA) {
 			System.out.println("LArgNr = \",\" VAtrib LArgNr");
 			updateToken();
-			
+
 			VAtrib();
 			LArgNr();
 		} else {
@@ -919,7 +904,7 @@ public class SyntaticAnalyzer {
 		}
 	}
 
-	public void Expr() {
+	private void Expr() {
 		TokenCategory tkCateg = this.currentToken.getCategory();
 
 		if (tkCateg == TokenCategory.ABRE_PAR) {
@@ -992,25 +977,25 @@ public class SyntaticAnalyzer {
 	}
 
 	private void NUMEROTEXTO() {
-		
+
 		switch (this.currentToken.getCategory()) {
 		case CONST_INT:
-			System.out.println("NUMEROTEXTO = \"constInt\"("+this.currentToken.getLexicalValue()+")");
+			System.out.println("NUMEROTEXTO = \"constInt\"(" + this.currentToken.getLexicalValue() + ")");
 			this.updateToken();
 			break;
-			
+
 		case CONST_REAL:
-			System.out.println("NUMEROTEXTO = \"constReal\"("+this.currentToken.getLexicalValue()+")");
+			System.out.println("NUMEROTEXTO = \"constReal\"(" + this.currentToken.getLexicalValue() + ")");
 			this.updateToken();
 			break;
-			
+
 		case CONST_CARACTERE:
-			System.out.println("NUMEROTEXTO = \"constChar\"("+this.currentToken.getLexicalValue()+")");
+			System.out.println("NUMEROTEXTO = \"constChar\"(" + this.currentToken.getLexicalValue() + ")");
 			this.updateToken();
 			break;
-			
+
 		case CONST_TEXTO:
-			System.out.println("NUMEROTEXTO = \"constTexto\"("+this.currentToken.getLexicalValue()+")");
+			System.out.println("NUMEROTEXTO = \"constTexto\"(" + this.currentToken.getLexicalValue() + ")");
 			this.updateToken();
 			break;
 
@@ -1104,7 +1089,7 @@ public class SyntaticAnalyzer {
 	private void OPB5() {
 
 		switch (this.currentToken.getCategory()) {
-		
+
 		case OP_BOOL_E:
 		case OP_BOOL_OU:
 			System.out.println("OPB5 = \"opbb\"(" + this.currentToken.getLexicalValue() + ") TR6");
@@ -1116,7 +1101,7 @@ public class SyntaticAnalyzer {
 			System.out.println("OPB5 = OPB6 OPB5R");
 			OPB6();
 			OPB5R();
-			
+
 			break;
 		}
 	}
@@ -1124,10 +1109,10 @@ public class SyntaticAnalyzer {
 	private void OPB5R() {
 		if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
 				|| this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_2) {
-			System.out.println("OPB5R = \"opr\"("+this.currentToken.getLexicalValue()+") TR5");
+			System.out.println("OPB5R = \"opr\"(" + this.currentToken.getLexicalValue() + ") TR5");
 			this.updateToken();
 			TR5();
-		}else
+		} else
 			System.out.println("OPB5R = epsilon");
 	}
 
