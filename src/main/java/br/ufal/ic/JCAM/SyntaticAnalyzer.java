@@ -284,7 +284,7 @@ public class SyntaticAnalyzer {
 	
 	public void Para() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_PARA) {
-			System.out.println("Para = \"repita\" \"(\" ParaExpr \")\" \"ate\" \"(\" TR6 \")\" \"passo\" \"(\" ParaExpr \")\" Escopo");
+			System.out.println("Para = \"para\" \"(\" ParaExpr \")\" \"ate\" \"(\" TR6 \")\" \"passo\" \"(\" ParaExpr \")\" Escopo");
 			updateToken();
 			
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
