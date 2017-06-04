@@ -1,24 +1,12 @@
-nome : inteiro 
-proxCmd : inteiro
-[ inteiro ; 5]
-procedimento teste (nome: inteiro, proxCmd : inteiro) {
+procedimento teste() {
 
 }
-procedimento teste2 () {
+
+funcao teste2() : inteiro {
+	retorne 2;
+}
+
+inicio() {
+
 
 }
-[2]
-teste[2]
-2.3
-value[2] = data[2]
-value2 = 2.3
-retorne data[0]
-x : inteiro, y : inteiro 
-value, value2, 2.3, n
-teste(2.3, 2)
-var x : inteiro = 1
-var lord : [inteiro ; 3] = {2, 3, 2}
-funcao fDeX (value : real) : real { 
-	;
-}
-global teste : inteiro; teste;
