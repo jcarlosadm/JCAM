@@ -223,12 +223,21 @@ public class Moabson {
 	
 	public void Se() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_SE) {
-			System.out.println("Se = \"se\" TR6 Escopo Senao");
+			System.out.println("Se = \"se\" \"(\" TR6 \")\" Escopo Senao");
 			updateToken();
 			
-			TR6();
-			Escopo();
-			Senao();
+			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+				updateToken();
+			
+				TR6();
+				
+				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+					updateToken();
+
+					Escopo();
+					Senao();
+				}
+			}
 		}
 	}
 	
@@ -273,7 +282,7 @@ public class Moabson {
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
 				
-				//ParaExpr();
+				ParaExpr();
 				
 				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					updateToken();
@@ -295,7 +304,7 @@ public class Moabson {
 									if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 										updateToken();
 										
-										// ParaExpr();
+										ParaExpr();
 										
 										if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 											updateToken();
@@ -333,9 +342,9 @@ public class Moabson {
 	public void ParaExpr() {
 		switch (currentToken.getCategory()) {
 			case ID:
-				System.out.println("ParaExpr = Atrib");
-				Atrib();
-				// ChVarConst() ?????????????????????
+				System.out.println("ParaExpr = \"id\" AcMatriz ParaExprR");
+				AcMatriz();
+				ParaExprR();
 				break;
 				
 			case PR_CMD_DECL_VAR:
@@ -346,8 +355,17 @@ public class Moabson {
 			default:
 				errorMsg("token não esperado");
 				break;
-		}
+		}	
+	}
 	
+	public void ParaExprR() {
+		if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
+			System.out.println("ParaExprR = AtribR");
+			
+			AtribR();
+		} else {
+			System.out.println("ParaExprR = epsilon");
+		}
 	}
 
 	public void LDeclGlob() {
@@ -570,7 +588,7 @@ public class Moabson {
 			Param();
 			LParamNr();
 		} else {
-			System.out.println("LParamNr = epsilon");
+			System.out.println("LParam = epsilon");
 		}
 		
 	}
@@ -689,7 +707,7 @@ public class Moabson {
 								errorMsg("tipo inválido");
 							}
 						} else {
-							errorMsg("\";\" esperado");
+							errorMsg("\":\" esperado");
 						}
 					} else {
 						errorMsg("\")\" esperado");
@@ -700,6 +718,8 @@ public class Moabson {
 			} else {
 				errorMsg("\"id\" invalido");
 			}
+		} else {
+			errorMsg("\"funcao\" esperado");
 		}
 	}
 
@@ -715,6 +735,7 @@ public class Moabson {
 
 	public void Proc() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_PROC) {
+			System.out.println("Proc = \"procedimento\" \"id\" \"(\" LParam \")\" Escopo\"");
 			updateToken();
 			if (currentToken.getCategory() == TokenCategory.ID) {
 				updateToken();
@@ -729,13 +750,13 @@ public class Moabson {
 						errorMsg("\")\" esperado");
 					}
 				} else {
-					errorMsg("\"(\" inválido");
+					errorMsg("\"(\" esperado");
 				}
-			} else if (currentToken.getCategory() == TokenCategory.PR_INICIO) {
-				//
 			} else {
 				errorMsg("\"id\" inválido");
 			}
+		} else {
+			errorMsg("\"procedimento\" esperado");
 		}
 	}
 
@@ -756,31 +777,26 @@ public class Moabson {
 	}
 
 	public void Inicio() {
-		if (currentToken.getCategory() == TokenCategory.PR_CMD_PROC) {
-			System.out.println("Inicio = \"procedimento\" \"inicio\" \"(\" \")\" Escopo");
-			updateToken();
+		if (currentToken.getCategory() == TokenCategory.PR_INICIO) {
+			System.out.println("Inicio = \"inicio\" \"(\" \")\" Escopo");
 			
-			if (currentToken.getCategory() == TokenCategory.PR_INICIO) {
-				updateToken(); 
-	
-				if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
-					updateToken();
+			updateToken(); 
+
+			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+				updateToken();
+				
+				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+					updateToken();		
 					
-					if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
-						updateToken();		
-						
-						Escopo();
-					} else {
-						errorMsg("\")\" esperado");
-					}
+					Escopo();
 				} else {
-					errorMsg("\"(\" esperado");
+					errorMsg("\")\" esperado");
 				}
 			} else {
-				errorMsg("\"inicio\" esperado");
+				errorMsg("\"(\" esperado");
 			}
 		} else {
-			errorMsg("\"procedimento\" esperado");
+			errorMsg("\"inicio\" esperado");
 		}
 	}
 
@@ -916,16 +932,9 @@ public class Moabson {
 	}
 
 	public void run() {
-
-		// if(this.updateToken()) {
-		// System.out.println(this.currentToken.getLexicalValue());
-		// }
-
-		// TODO: remover após testes ~> arquivo testes.jcam
 		updateToken();
 		System.out.println(currentToken);
-		LDeclGlob();
-		
+		Programa();
 	}
 
 }
