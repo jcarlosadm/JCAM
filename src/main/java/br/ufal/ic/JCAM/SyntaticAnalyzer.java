@@ -504,7 +504,7 @@ public class SyntaticAnalyzer {
 			updateToken();
 	
 			DeclAtribTipo();
-		} else if (currentToken.getCategory() == TokenCategory.ABRE_CH) {
+		} else if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
 			System.out.println("DeclTipoAtrib = Matriz DeclAtribMatriz");
 			
 			Matriz();
