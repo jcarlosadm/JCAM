@@ -105,17 +105,51 @@ public class Jcarlos {
 	}
 
 	private void OPU2() {
-		// TODO Auto-generated method stub
-
+		if (this.currentToken.getCategory() == TokenCategory.OP_BOOL_NAO) {
+			System.out.println("OPU2 = \"opbu\"(" + this.currentToken.getLexicalValue() + ") TR6");
+			this.updateToken();
+			TR6();
+		} else
+			this.errorMsg("token não esperado");
 	}
 
 	private void OPU() {
-		// TODO Auto-generated method stub
+		if (this.currentToken.getCategory() == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("OPU = \"oparu\"(" + this.currentToken.getLexicalValue() + ") TR11");
+			this.updateToken();
+			TR11();
+		} else
+			this.errorMsg("token não esperado");
 
 	}
 
 	private void NUMEROTEXTO() {
-		// TODO Auto-generated method stub
+		
+		switch (this.currentToken.getCategory()) {
+		case CONST_INT:
+			System.out.println("NUMEROTEXTO = \"constInt\"("+this.currentToken.getLexicalValue()+")");
+			this.updateToken();
+			break;
+			
+		case CONST_REAL:
+			System.out.println("NUMEROTEXTO = \"constReal\"("+this.currentToken.getLexicalValue()+")");
+			this.updateToken();
+			break;
+			
+		case CONST_CARACTERE:
+			System.out.println("NUMEROTEXTO = \"constChar\"("+this.currentToken.getLexicalValue()+")");
+			this.updateToken();
+			break;
+			
+		case CONST_TEXTO:
+			System.out.println("NUMEROTEXTO = \"constTexto\"("+this.currentToken.getLexicalValue()+")");
+			this.updateToken();
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
 
 	}
 
@@ -174,27 +208,144 @@ public class Jcarlos {
 	}
 
 	private void OPU4() {
-		// TODO Auto-generated method stub
 
+		if (this.currentToken.getCategory() == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("OPU4 = OPU5 \"opr\" TR19");
+			OPU5();
+			if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
+					|| this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_2) {
+				this.updateToken();
+				TR19();
+			}
+		} else
+			this.errorMsg("token não esperado");
 	}
 
 	private void OPB6() {
-		// TODO Auto-generated method stub
 
+		if (this.currentToken.getCategory() == TokenCategory.OP_ARIT_ADD
+				|| this.currentToken.getCategory() == TokenCategory.OP_ARIT_MUL
+				|| this.currentToken.getCategory() == TokenCategory.OP_ARIT_EXP) {
+			System.out.println("OPB6 = \"oparb\"(" + this.currentToken.getLexicalValue() + ") TR19");
+			this.updateToken();
+			TR19();
+		} else
+			System.out.println("OPB6 = epsilon");
 	}
 
 	private void OPB5() {
-		// TODO Auto-generated method stub
 
+		switch (this.currentToken.getCategory()) {
+		case OP_ARIT_ADD:
+		case OP_ARIT_MUL:
+		case OP_ARIT_EXP:
+			System.out.println("OPB5 = OPB6 \"opr\" TR5");
+			OPB6();
+			if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
+					|| this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_2) {
+				this.updateToken();
+				TR5();
+			} else
+				this.errorMsg("\"opr\" esperado");
+			break;
+
+		case OP_BOOL_E:
+		case OP_BOOL_OU:
+			System.out.println("OPB5 = \"opbb\"(" + this.currentToken.getLexicalValue() + ") TR6");
+			this.updateToken();
+			TR6();
+			break;
+
+		default:
+			System.out.println("OPB5 = epsilon");
+			break;
+		}
 	}
 
 	private void TR17() {
-		// TODO Auto-generated method stub
 
+		if (this.currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+			System.out.println("TR17 = \"(\" TR18");
+			this.updateToken();
+			TR18();
+		} else
+			this.errorMsg("\"(\" esperado");
+	}
+
+	private void TR18() {
+
+		switch (this.currentToken.getCategory()) {
+		case ID:
+			System.out.println("TR18 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB5 \")\" OPB3");
+			this.updateToken();
+			TR2();
+			OPB5();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB3();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case CONST_INT:
+		case CONST_REAL:
+		case CONST_CARACTERE:
+		case CONST_TEXTO:
+			System.out.println("TR18 = NUMEROTEXTO OPB6 \"opr\" TR5 \")\" OPB3");
+			NUMEROTEXTO();
+			OPB6();
+			if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
+					|| this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_2) {
+				this.updateToken();
+				TR5();
+				if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+					this.updateToken();
+					OPB3();
+				} else
+					this.errorMsg("\")\" esperado");
+			} else
+				this.errorMsg("\"opr\" esperado");
+			break;
+
+		case CONST_BOOL:
+			System.out.println("TR18 = \"constBool\"(" + this.currentToken.getLexicalValue() + ") OPB3 \")\" OPB3");
+			this.updateToken();
+			OPB3();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB3();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case OP_BOOL_NAO:
+			System.out.println("TR18 = OPU2 \")\" OPB3");
+			OPU2();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB3();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case OP_ARIT_ADD:
+			System.out.println("TR18 = OPU4 \")\" OPB3");
+			OPU4();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB3();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
 	}
 
 	private void TR11() {
-		
+
 		switch (this.currentToken.getCategory()) {
 		case ABRE_PAR:
 			System.out.println("TR11 = TR12");
@@ -202,24 +353,24 @@ public class Jcarlos {
 			break;
 
 		case ID:
-			System.out.println("TR11 = \"id\"(" +this.currentToken.getLexicalValue() + ") TR2 OPB2");
+			System.out.println("TR11 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB2");
 			this.updateToken();
 			TR2();
 			OPB2();
 			break;
-		
+
 		case CONST_INT:
 		case CONST_REAL:
 			System.out.println("TR11 = NUMERO OPB2");
 			NUMERO();
 			OPB2();
 			break;
-			
+
 		case OP_ARIT_ADD:
 			System.out.println("TR11 = OPU");
 			OPU();
 			break;
-			
+
 		default:
 			this.errorMsg("token não esperado");
 			break;
@@ -228,8 +379,22 @@ public class Jcarlos {
 	}
 
 	private void NUMERO() {
-		// TODO Auto-generated method stub
-		
+
+		switch (this.currentToken.getCategory()) {
+		case CONST_INT:
+			System.out.println("NUMERO = \"constInt\"(" + this.currentToken.getLexicalValue() + ")");
+			this.updateToken();
+			break;
+
+		case CONST_REAL:
+			System.out.println("NUMERO = \"constReal\"(" + this.currentToken.getLexicalValue() + ")");
+			this.updateToken();
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
 	}
 
 	private void TR12() {
@@ -242,10 +407,10 @@ public class Jcarlos {
 	}
 
 	private void TR13() {
-		
+
 		switch (this.currentToken.getCategory()) {
 		case ID:
-			System.out.println("TR13 = \"id\"(" +this.currentToken.getLexicalValue()+") TR2 OPB2 \")\" OPB2");
+			System.out.println("TR13 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB2 \")\" OPB2");
 			this.updateToken();
 			TR2();
 			OPB2();
@@ -255,7 +420,7 @@ public class Jcarlos {
 			} else
 				this.errorMsg("\")\" esperado");
 			break;
-			
+
 		case CONST_INT:
 		case CONST_REAL:
 			System.out.println("TR13 = NUMERO OPB2 \")\" OPB2");
@@ -267,7 +432,7 @@ public class Jcarlos {
 			} else
 				this.errorMsg("\")\" esperado");
 			break;
-			
+
 		case OP_ARIT_ADD:
 			System.out.println("TR13 = OPU \")\" OPB2");
 			OPU();
@@ -282,22 +447,74 @@ public class Jcarlos {
 			this.errorMsg("token não esperado");
 			break;
 		}
-		
+
 	}
 
 	private void OPB3() {
-		// TODO Auto-generated method stub
 
+		if (this.currentToken.getCategory() == TokenCategory.OP_BOOL_E
+				|| this.currentToken.getCategory() == TokenCategory.OP_BOOL_OU) {
+			System.out.println("OPB3 = \"opbb\"(" + this.currentToken.getLexicalValue() + ") TR6");
+			this.updateToken();
+			TR6();
+		} else
+			System.out.println("OPB3 = epsilon");
 	}
 
 	private void OPB2() {
-		// TODO Auto-generated method stub
+
+		switch (this.currentToken.getCategory()) {
+		case OP_ARIT_ADD:
+		case OP_ARIT_MUL:
+		case OP_ARIT_EXP:
+			System.out.println("OPB2 = \"oparb\"(" + this.currentToken.getLexicalValue() + ") TR4");
+			this.updateToken();
+			TR4();
+			break;
+
+		case OP_RELACIONAL_1:
+		case OP_RELACIONAL_2:
+			System.out.println("OPB2 = \"opr\"(" + this.currentToken.getLexicalValue() + ") TR5");
+			this.updateToken();
+			TR5();
+			break;
+
+		default:
+			System.out.println("OPB2 = epsilon");
+			break;
+		}
 
 	}
 
 	private void OPB() {
-		// TODO Auto-generated method stub
 
+		switch (this.currentToken.getCategory()) {
+		case OP_ARIT_ADD:
+		case OP_ARIT_MUL:
+		case OP_ARIT_EXP:
+			System.out.println("OPB = \"oparb\"(" + this.currentToken.getLexicalValue() + ") TR4");
+			this.updateToken();
+			TR4();
+			break;
+
+		case OP_RELACIONAL_1:
+		case OP_RELACIONAL_2:
+			System.out.println("OPB = \"opr\"(" + this.currentToken.getLexicalValue() + ") TR5");
+			this.updateToken();
+			TR5();
+			break;
+
+		case OP_BOOL_E:
+		case OP_BOOL_OU:
+			System.out.println("OPB = \"opbb\"(" + this.currentToken.getLexicalValue() + ") TR6");
+			this.updateToken();
+			TR6();
+			break;
+
+		default:
+			System.out.println("OPB = epsilon");
+			break;
+		}
 	}
 
 	private void TR2() {
@@ -306,7 +523,7 @@ public class Jcarlos {
 			System.out.println("TR2 = ChFuncProcR");
 			ChFuncProcR();
 		}
-		
+
 		else {
 			System.out.println("TR2 = AcMatriz");
 			AcMatriz();
@@ -452,13 +669,37 @@ public class Jcarlos {
 	}
 
 	private void OPU3() {
-		// TODO Auto-generated method stub
 
+		if (this.currentToken.getCategory() == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("OPU3 = \"oparu\"(" + this.currentToken.getLexicalValue() + ") TR14");
+			this.updateToken();
+			TR14();
+		} else
+			this.errorMsg("token não esperado");
 	}
 
 	private void OPB4() {
-		// TODO Auto-generated method stub
 
+		switch (this.currentToken.getCategory()) {
+		case OP_ARIT_ADD:
+		case OP_ARIT_MUL:
+		case OP_ARIT_EXP:
+			System.out.println("OPB4 = \"oparb\"(" + this.currentToken.getLexicalValue() + ") TR5");
+			this.updateToken();
+			TR5();
+			break;
+
+		case OP_BOOL_E:
+		case OP_BOOL_OU:
+			System.out.println("OPB4 = \"opbb\"(" + this.currentToken.getLexicalValue() + ") TR6");
+			this.updateToken();
+			TR6();
+			break;
+
+		default:
+			System.out.println("OPB4 = epsilon");
+			break;
+		}
 	}
 
 	private void TR9() {
@@ -485,7 +726,7 @@ public class Jcarlos {
 				this.errorMsg("\")\" esperado");
 
 			break;
-			
+
 		case CONST_INT:
 		case CONST_REAL:
 		case CONST_CARACTERE:
@@ -499,7 +740,7 @@ public class Jcarlos {
 			} else
 				this.errorMsg("\")\" esperado");
 			break;
-			
+
 		case OP_ARIT_ADD:
 			System.out.println("TR10 = OPU3 \")\" OPB4");
 			OPU3();
@@ -508,9 +749,9 @@ public class Jcarlos {
 				OPB4();
 			} else
 				this.errorMsg("\")\" esperado");
-			
+
 			break;
-			
+
 		default:
 			this.errorMsg("token não esperado");
 			break;
@@ -566,6 +807,192 @@ public class Jcarlos {
 			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 				this.updateToken();
 				OPB2();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
+	}
+
+	private void TR14() {
+
+		switch (this.currentToken.getCategory()) {
+		case ABRE_PAR:
+			System.out.println("TR14 = TR15");
+			TR15();
+			break;
+
+		case ID:
+			System.out.println("TR14 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB4");
+			this.updateToken();
+			TR2();
+			OPB4();
+			break;
+
+		case CONST_INT:
+		case CONST_REAL:
+			System.out.println("TR14 = NUMERO OPB4");
+			NUMERO();
+			OPB4();
+			break;
+
+		case OP_ARIT_ADD:
+			System.out.println("TR14 = OPU3");
+			OPU3();
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
+	}
+
+	private void TR15() {
+		if (this.currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+			System.out.println("TR15 = \"(\" TR16");
+			this.updateToken();
+			TR16();
+		} else
+			this.errorMsg("\"(\" esperado");
+	}
+
+	private void TR16() {
+
+		switch (this.currentToken.getCategory()) {
+		case ID:
+			System.out.println("TR16 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB4 \")\" OPB4");
+			this.updateToken();
+			TR2();
+			OPB4();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB4();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case CONST_INT:
+		case CONST_REAL:
+			System.out.println("TR16 = NUMERO OPB4 \")\" OPB4");
+			NUMERO();
+			OPB4();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB4();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case OP_ARIT_ADD:
+			System.out.println("TR16 = OPU3 \")\" OPB4");
+			OPU3();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB4();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
+	}
+
+	private void TR19() {
+
+		switch (this.currentToken.getCategory()) {
+		case ABRE_PAR:
+			System.out.println("TR19 = TR20");
+			TR20();
+			break;
+
+		case ID:
+			System.out.println("TR19 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB6");
+			this.updateToken();
+			TR2();
+			OPB6();
+			break;
+
+		case CONST_INT:
+		case CONST_REAL:
+		case CONST_CARACTERE:
+		case CONST_TEXTO:
+			System.out.println("TR19 = NUMEROTEXTO OPB6");
+			NUMEROTEXTO();
+			OPB6();
+			break;
+
+		case OP_ARIT_ADD:
+			System.out.println("TR19 = OPU5");
+			OPU5();
+			break;
+
+		default:
+			this.errorMsg("token não esperado");
+			break;
+		}
+	}
+
+	private void OPU5() {
+
+		if (this.currentToken.getCategory() == TokenCategory.OP_ARIT_ADD) {
+			System.out.println("OPU5 = \"oparu\"(" + this.currentToken.getLexicalValue() + ") TR19");
+			this.updateToken();
+			TR19();
+		} else
+			this.errorMsg("token não esperado");
+
+	}
+
+	private void TR20() {
+
+		if (this.currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+			System.out.println("TR20 = \"(\" TR21");
+			this.updateToken();
+			TR21();
+		} else
+			this.errorMsg("\"(\" esperado");
+	}
+
+	private void TR21() {
+
+		switch (this.currentToken.getCategory()) {
+		case ID:
+			System.out.println("TR21 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB6 \")\" OPB6");
+			this.updateToken();
+			TR2();
+			OPB6();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB6();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case CONST_INT:
+		case CONST_REAL:
+		case CONST_CARACTERE:
+		case CONST_TEXTO:
+			System.out.println("TR21 = NUMEROTEXTO OPB6 \")\" OPB6");
+			NUMEROTEXTO();
+			OPB6();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB6();
+			} else
+				this.errorMsg("\")\" esperado");
+			break;
+
+		case OP_ARIT_ADD:
+			System.out.println("TR21 = OPU5 \")\" OPB6");
+			OPU5();
+			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+				this.updateToken();
+				OPB6();
 			} else
 				this.errorMsg("\")\" esperado");
 			break;
