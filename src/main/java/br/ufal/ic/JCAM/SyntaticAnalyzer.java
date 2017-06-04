@@ -327,6 +327,7 @@ public class SyntaticAnalyzer {
 	public void Enquanto() {
 		if (currentToken.getCategory() == TokenCategory.PR_CMD_ENQUANTO) {
 			System.out.println("Enquanto = \"enquanto\" \"(\" TR6 \")\" Escopo");
+			this.updateToken();
 			
 			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
 				updateToken();
@@ -550,7 +551,7 @@ public class SyntaticAnalyzer {
 
 	public void Matriz() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
-			System.out.println("Matriz = \"[\" \"tipo\" \";\" \"constInt\" \"]\"");
+			System.out.println("Matriz = \"[\" \"tipo\" \";\" MatrizTamanho \"]\"");
 			updateToken();
 
 			TokenCategory category = currentToken.getCategory();
@@ -560,16 +561,12 @@ public class SyntaticAnalyzer {
 				if (currentToken.getCategory() == TokenCategory.SE_PONTOVIRGULA) {
 					updateToken();
 					
-					if (currentToken.getCategory() == TokenCategory.CONST_INT) {
+					MatrizTamanho();
+					
+					if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
 						updateToken();
-						
-						if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
-							updateToken();
-						} else {
-							errorMsg("\"]\" esperado");
-						}
 					} else {
-						errorMsg("\"constInt\" esperada");
+						errorMsg("\"]\" esperado");
 					}
 				} else {
 					errorMsg("\";\" esperado");
@@ -582,6 +579,22 @@ public class SyntaticAnalyzer {
 		}
 	}
 
+	private void MatrizTamanho() {
+		if(this.currentToken.getCategory() == TokenCategory.ID) {
+			System.out.println("MatrizTamanho = \"id\"("+this.currentToken.getLexicalValue()+") AcMatriz");
+			this.updateToken();
+			AcMatriz();
+		}
+		
+		else if (this.currentToken.getCategory() == TokenCategory.CONST_INT) {
+			System.out.println("MatrizTamanho = \"constInt\"("+this.currentToken.getLexicalValue()+")");
+			this.updateToken();
+		}
+		
+		else
+			this.errorMsg("token não esperado");
+	}
+
 	public void ChVarConst() {
 		if (currentToken.getCategory() == TokenCategory.ID) {
 			System.out.println("ChVarConst = \"id\" AcMatriz");
@@ -592,17 +605,14 @@ public class SyntaticAnalyzer {
 
 	public void AcMatriz() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
-            System.out.println("AcMatriz = \"[\"\"constInt\"\"]\"");
+            System.out.println("AcMatriz = \"[\" MatrizTamanho \"]\"");
 			updateToken();
-			if (currentToken.getCategory() == TokenCategory.CONST_INT) {
+			
+			MatrizTamanho();
+			if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
 				updateToken();
-				if (currentToken.getCategory() == TokenCategory.FECHA_COL) {
-					updateToken();
-				} else {
-					errorMsg("\"]\" esperado");
-				}
 			} else {
-				errorMsg("\"constInt\" esperada");
+				errorMsg("\"]\" esperado");
 			}
 		} else {
 			System.out.println("AcMatriz = epsilon");
@@ -1135,13 +1145,13 @@ public class SyntaticAnalyzer {
 
 		switch (this.currentToken.getCategory()) {
 		case ID:
-			System.out.println("TR18 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB5 \")\" OPB3");
+			System.out.println("TR18 = \"id\"(" + this.currentToken.getLexicalValue() + ") TR2 OPB5 \")\" OPB5");
 			this.updateToken();
 			TR2();
 			OPB5();
 			if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 				this.updateToken();
-				OPB3();
+				OPB5();
 			} else
 				this.errorMsg("\")\" esperado");
 			break;
@@ -1150,7 +1160,7 @@ public class SyntaticAnalyzer {
 		case CONST_REAL:
 		case CONST_CARACTERE:
 		case CONST_TEXTO:
-			System.out.println("TR18 = NUMEROTEXTO OPB6 \"opr\" TR5 \")\" OPB3");
+			System.out.println("TR18 = NUMEROTEXTO OPB6 \"opr\" TR5 \")\" OPB5");
 			NUMEROTEXTO();
 			OPB6();
 			if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
@@ -1159,7 +1169,7 @@ public class SyntaticAnalyzer {
 				TR5();
 				if (this.currentToken.getCategory() == TokenCategory.FECHA_PAR) {
 					this.updateToken();
-					OPB3();
+					OPB5();
 				} else
 					this.errorMsg("\")\" esperado");
 			} else

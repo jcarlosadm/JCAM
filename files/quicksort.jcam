@@ -1,7 +1,7 @@
 inicio(){
     const tamanho : inteiro = 5;
     var lista : [inteiro; tamanho] = {4, 7, 2, 8, 1};
-    var pilha = [inteiro; tamanho];
+    var pilha : [inteiro; tamanho];
     
     var topo : inteiro = 0;
     var h : inteiro = tamanho - 1;
@@ -34,8 +34,9 @@ inicio(){
             }
         }
         
-        aux = arr[i + 1];
-        arr[i + 1] = arr[h];
+        var xx : inteiro = i + 1;
+        aux = arr[xx];
+        arr[xx] = arr[h];
         arr[h] = aux;
         
         p = i + 1;
