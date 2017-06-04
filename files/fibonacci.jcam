@@ -14,6 +14,6 @@ procedimento fibonacci(n : inteiro) {
     }
 }
 
-procedimento inicio() {
+inicio() {
     fibonacci(7);
 }

@@ -1,4 +1,4 @@
-procedimento inicio(){
+inicio(){
     const tamanho : inteiro = 5;
     var lista : [inteiro; tamanho] = {4, 7, 2, 8, 1};
     var pilha = [inteiro; tamanho];
