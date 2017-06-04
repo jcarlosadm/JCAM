@@ -62,7 +62,7 @@ public class SyntaticAnalyzer {
 		if (this.currentToken == null)
 			System.out.println("erro inesperado");
 		else
-			System.out.println("token: " + this.currentToken.getLexicalValue() + "." + msg + ". linha "
+			System.out.println("ERRO. token: " + this.currentToken.getLexicalValue() + "." + msg + ". linha "
 					+ this.currentToken.getPosition().getLine() + ", coluna "
 					+ this.currentToken.getPosition().getColumn() + ".");
 		this.success = false;
@@ -236,19 +236,16 @@ public class SyntaticAnalyzer {
 	
 	public void CmdSemEscopoR() {
 		switch (currentToken.getCategory()) {
-			case ABRE_COL:
-				System.out.println("CmdSemEscopoR = AcMatriz CmdSemEscopoR2");
-				AcMatriz();
-				CmdSemEscopoR2();
-				break;
-			
-			case ABRE_CH:
+		
+			case ABRE_PAR:
 				System.out.println("CmdSemEscopoR = ChFuncProcR");
 				ChFuncProcR();
 				break;
 	
 			default:
-				errorMsg("token não esperado");
+				System.out.println("CmdSemEscopoR = AcMatriz CmdSemEscopoR2");
+				AcMatriz();
+				CmdSemEscopoR2();
 				break;
 		}		
 	}
@@ -420,6 +417,7 @@ public class SyntaticAnalyzer {
 		switch (currentToken.getCategory()) {
 			case ID:
 				System.out.println("ParaExpr = \"id\" AcMatriz ParaExprR");
+				this.updateToken();
 				AcMatriz();
 				ParaExprR();
 				break;
@@ -1096,19 +1094,7 @@ public class SyntaticAnalyzer {
 	private void OPB5() {
 
 		switch (this.currentToken.getCategory()) {
-		case OP_ARIT_ADD:
-		case OP_ARIT_MUL:
-		case OP_ARIT_EXP:
-			System.out.println("OPB5 = OPB6 \"opr\" TR5");
-			OPB6();
-			if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
-					|| this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_2) {
-				this.updateToken();
-				TR5();
-			} else
-				this.errorMsg("\"opr\" esperado");
-			break;
-
+		
 		case OP_BOOL_E:
 		case OP_BOOL_OU:
 			System.out.println("OPB5 = \"opbb\"(" + this.currentToken.getLexicalValue() + ") TR6");
@@ -1117,9 +1103,22 @@ public class SyntaticAnalyzer {
 			break;
 
 		default:
-			System.out.println("OPB5 = epsilon");
+			System.out.println("OPB5 = OPB6 OPB5R");
+			OPB6();
+			OPB5R();
+			
 			break;
 		}
+	}
+
+	private void OPB5R() {
+		if (this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_1
+				|| this.currentToken.getCategory() == TokenCategory.OP_RELACIONAL_2) {
+			System.out.println("OPB5R = \"opr\"("+this.currentToken.getLexicalValue()+") TR5");
+			this.updateToken();
+			TR5();
+		}else
+			System.out.println("OPB5R = epsilon");
 	}
 
 	private void TR17() {
