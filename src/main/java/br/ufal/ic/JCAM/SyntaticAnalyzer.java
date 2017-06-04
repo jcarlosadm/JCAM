@@ -88,9 +88,10 @@ public class SyntaticAnalyzer {
 			System.out.println("Escopo = \"{\" LCmd \"}\"");
 			updateToken();
 
+			LCmd();
+			
 			if (currentToken.getCategory() == TokenCategory.FECHA_CH) {
 				updateToken();
-				LCmd();
 			} else {
 				errorMsg("\"}\" esperado");
 			}
@@ -108,6 +109,8 @@ public class SyntaticAnalyzer {
 			case PR_CMD_SE:
 			case PR_CMD_ENQUANTO:
 			case PR_CMD_PARA:
+			case PR_ESCREVA:
+			case PR_LEIA:
 				System.out.println("LCmd = Cmd LCmd");
 				Cmd();
 				LCmd();
@@ -150,18 +153,82 @@ public class SyntaticAnalyzer {
 	public void CmdSemEscopo() {
 		switch (currentToken.getCategory()) {
 			case ID:
+				System.out.println("CmdSemEscopo = \"id\" CmdSemEscopoR");
 				updateToken();
 				CmdSemEscopoR();
 				break;
 			
 			case PR_CMD_DECL_VAR:
 			case PR_CMD_DECL_CONST:
+				System.out.println("CmdSemEscopo = Decl");
 				Decl();
+				break;
+				
+			case PR_ESCREVA:
+				System.out.println("CmdSemEscopo = Escreva");
+				Escreva();
+				break;
+				
+			case PR_LEIA:
+				System.out.println("CmdSemEscopo = Leia");
+				Leia();
 				break;
 
 			default:
 				errorMsg("token não esperado");
 				break;
+		}
+	}
+	
+	public void Escreva() {
+		if (currentToken.getCategory() == TokenCategory.PR_ESCREVA) {
+			System.out.println("Escreva = \"escreva\" \"(\" Expr \")\"");
+			updateToken();
+			
+			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+				updateToken();
+				
+				Expr();
+				
+				if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+					updateToken();
+				} else {
+					errorMsg("\")\" esperado");
+				}
+			} else {
+				errorMsg("\"(\" esperado");				
+			}
+		} else {
+			errorMsg("\"escreva\" esperado");	
+		}
+	}
+	
+	public void Leia() {
+		if (currentToken.getCategory() == TokenCategory.PR_LEIA) {
+			System.out.println("Leia = \"leia\" \"(\" \"id\" AcMatriz \")\"");
+			updateToken();
+			
+			if (currentToken.getCategory() == TokenCategory.ABRE_PAR) {
+				updateToken();
+				
+				if (currentToken.getCategory() == TokenCategory.ID) {
+					updateToken();
+					
+					AcMatriz();
+					
+					if (currentToken.getCategory() == TokenCategory.FECHA_PAR) {
+						updateToken();
+					} else {
+						errorMsg("\")\" esperado");
+					}
+				} else {
+					errorMsg("\"id\" invalido");
+				}
+			} else {
+				errorMsg("\"(\" esperado");
+			}
+		} else {
+			errorMsg("\"leia\" esperado");
 		}
 	}
 	
