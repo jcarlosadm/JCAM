@@ -236,8 +236,14 @@ public class SyntaticAnalyzer {
 
 					Escopo();
 					Senao();
+				} else {
+					errorMsg("\")\" esperado");
 				}
+			} else {
+				errorMsg("\"(\" esperado");
 			}
+		} else {
+			errorMsg("\"se\" esperado");
 		}
 	}
 	
@@ -271,6 +277,8 @@ public class SyntaticAnalyzer {
 			} else {
 				errorMsg("\"(\" esperado");
 			}
+		} else {
+			errorMsg("\"enquanto\" esperado");			
 		}
 	}
 	
