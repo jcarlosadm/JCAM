@@ -12,9 +12,7 @@ public class SyntaticAnalyzer {
 	private boolean success = true;
 
 	private static List<TokenCategory> typesCategory;
-	// private static List<TokenCategory> commandsWithScope;
-	// private static List<TokenCategory> commandsWithoutScope;
-
+	
 	static {
 		typesCategory = Arrays.asList(TokenCategory.PR_TIPO_BOOLEANO, TokenCategory.PR_TIPO_CARACTERE,
 				TokenCategory.PR_TIPO_INTEIRO, TokenCategory.PR_TIPO_REAL, TokenCategory.PR_TIPO_TEXTO);
@@ -23,6 +21,15 @@ public class SyntaticAnalyzer {
 
 	public SyntaticAnalyzer(LexicalAnalyzer lexicalAnalyzer) {
 		this.lexicalAnalyzer = lexicalAnalyzer;
+	}
+	
+	public boolean isSuccess() {
+		return success;
+	}
+	
+	public void run() {
+		updateToken();
+		Programa();
 	}
 
 	private void updateToken() {
@@ -46,13 +53,16 @@ public class SyntaticAnalyzer {
 	}
 
 	private void errorMsg(String msg) {
-		if (this.currentToken == null)
+		if (this.currentToken == null) {
 			System.out.println("erro inesperado");
-		else
-			System.out.println("ERRO. token: " + this.currentToken.getLexicalValue() + "." + msg + ". linha "
-					+ this.currentToken.getPosition().getLine() + ", coluna "
+		} else {
+			System.out.println("ERRO: Token " + this.currentToken.getLexicalValue() + ". " + msg + ". Linha "
+					+ this.currentToken.getPosition().getLine() + ", Coluna "
 					+ this.currentToken.getPosition().getColumn() + ".");
+		}
+		
 		this.success = false;
+		System.exit(-1);
 	}
 
 	private void Programa() {
@@ -582,14 +592,6 @@ public class SyntaticAnalyzer {
 			this.errorMsg("token não esperado");
 	}
 
-	private void ChVarConst() {
-		if (currentToken.getCategory() == TokenCategory.ID) {
-			System.out.println("ChVarConst = \"id\"(" + currentToken.getLexicalValue() + ") AcMatriz");
-			updateToken();
-			AcMatriz();
-		}
-	}
-
 	private void AcMatriz() {
 		if (currentToken.getCategory() == TokenCategory.ABRE_COL) {
 			System.out.println("AcMatriz = \"[\" MatrizTamanho \"]\"");
@@ -613,24 +615,6 @@ public class SyntaticAnalyzer {
 			VAtrib();
 		} else {
 			errorMsg("\"retorne\" esperado");
-		}
-	}
-
-	private void Atrib() {
-		if (currentToken.getCategory() == TokenCategory.ID) {
-			System.out.println("Atrib = \"id\"(" + currentToken.getLexicalValue() + ") AcMatriz AtribR");
-			updateToken();
-
-			AcMatriz();
-			if (currentToken.getCategory() == TokenCategory.OP_ATRIBUICAO) {
-				updateToken();
-
-				AtribR();
-			} else {
-				errorMsg("\"=\" esperado");
-			}
-		} else {
-			errorMsg("\"id\" inválido");
 		}
 	}
 
@@ -1845,12 +1829,6 @@ public class SyntaticAnalyzer {
 			this.errorMsg("token não esperado");
 			break;
 		}
-	}
-
-	public void run() {
-		updateToken();
-		System.out.println(currentToken);
-		Programa();
 	}
 
 }
